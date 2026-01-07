@@ -1,0 +1,33 @@
+---
+title: "Report on the impact prescribed fire on bird communities in Canada's National Parks"
+format:
+  html:
+    grid:
+      margin-width: 300px
+navbar: right
+theme: cosmo
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+author: 
+  - name: "Alex MacPhail"
+    affiliation: "Biodiversity Pathways Ltd."
+  - name: "Gregg Walker"
+    affiliation: "Parks Canada"
+editor: visual
+nocite: '@*'
+bibliography: references.bib
+toc: true
+toc-depth: 3
+toc-expand: true
+prefer-html: true
+toc-location: left
+styles: styles.css
+github: https://github.com/biodiversitypathways/pc-prescribed-fire
+---
+
+This is a test
+
+```{r}
+
+
+
+```
