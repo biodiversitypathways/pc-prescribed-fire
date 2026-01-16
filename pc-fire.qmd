@@ -1,5 +1,5 @@
 ---
-title: "Report on the impact prescribed fire on bird communities in Canada's National Parks"
+title: "Report on the use of prescribed fire on bird communities in Canada's National Parks"
 format:
   html:
     grid:
@@ -61,6 +61,11 @@ burns <- wt_get_projects("ARU") |>
 
 ```
 
+# Introduction
+
+
+# Methods
+
 ```{r}
 # Wrangle
 
@@ -81,8 +86,6 @@ burns_fire <- burns |>
   left_join(pf_fire_locs, by = c("location_id","year"))
 
 ```
-
-
 
 ```{r}
 # Map
@@ -119,7 +122,7 @@ covs |>
 
 ```
 
-
+# Results
 
 ```{r}
 
@@ -177,3 +180,5 @@ shannon_d |>
   )
 
 ```
+
+# Discussion and Recommendations
