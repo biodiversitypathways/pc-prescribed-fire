@@ -8,7 +8,7 @@
 
 <meta name="author" content="Alex MacPhail">
 <meta name="author" content="Gregg Walker">
-<meta name="dcterms.date" content="2026-01-07">
+<meta name="dcterms.date" content="2026-01-16">
 
 <title>Report on the impact prescribed fire on bird communities in Canada’s National Parks</title>
 <style>
@@ -22,6 +22,41 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -38,6 +73,21 @@ ul.task-list li input[type="checkbox"] {
 <script src="pc-fire_files/libs/bootstrap/bootstrap.min.js"></script>
 <link href="pc-fire_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="pc-fire_files/libs/bootstrap/bootstrap-d9ee3e7c13397ee64e8144b167ea800e.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="pc-fire_files/libs/htmltools-fill-0.5.9/fill.css" rel="stylesheet">
+<script src="pc-fire_files/libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
+<script src="pc-fire_files/libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<link href="pc-fire_files/libs/leaflet-1.3.1/leaflet.css" rel="stylesheet">
+<script src="pc-fire_files/libs/leaflet-1.3.1/leaflet.js"></script>
+<link href="pc-fire_files/libs/leafletfix-1.0.0/leafletfix.css" rel="stylesheet">
+<script src="pc-fire_files/libs/proj4-2.6.2/proj4.min.js"></script>
+<script src="pc-fire_files/libs/Proj4Leaflet-1.0.1/proj4leaflet.js"></script>
+<link href="pc-fire_files/libs/rstudio_leaflet-1.3.1/rstudio_leaflet.css" rel="stylesheet">
+<script src="pc-fire_files/libs/leaflet-binding-2.2.2/leaflet.js"></script>
+<link href="pc-fire_files/libs/leaflet-measure-2.1.7/leaflet-measure.css" rel="stylesheet">
+<script src="pc-fire_files/libs/leaflet-measure-2.1.7/leaflet-measure.min.js"></script>
+<link href="pc-fire_files/libs/leaflet-minimap-3.3.1/Control.MiniMap.min.css" rel="stylesheet">
+<script src="pc-fire_files/libs/leaflet-minimap-3.3.1/Control.MiniMap.min.js"></script>
+<script src="pc-fire_files/libs/leaflet-minimap-3.3.1/Minimap-binding.js"></script>
 
 
 </head>
@@ -86,7 +136,7 @@ ul.task-list li input[type="checkbox"] {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">January 7, 2026</p>
+      <p class="date">January 16, 2026</p>
     </div>
   </div>
   
@@ -99,6 +149,230 @@ ul.task-list li input[type="checkbox"] {
 
 
 <p>This is a test</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(wildrtrax)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'ggplot2' was built under R version 4.5.2</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'tidyr' was built under R version 4.5.2</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'readr' was built under R version 4.5.2</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+✔ dplyr     1.1.4     ✔ readr     2.1.6
+✔ forcats   1.0.0     ✔ stringr   1.6.0
+✔ ggplot2   4.0.1     ✔ tibble    3.3.0
+✔ lubridate 1.9.4     ✔ tidyr     1.3.2
+✔ purrr     1.2.0     
+── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'sf' was built under R version 4.5.2</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Linking to GEOS 3.13.0, GDAL 3.8.5, PROJ 9.5.1; sf_use_s2() is TRUE</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(leaflet)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(vegan)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: permute</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"pc-fire.RData"</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="co">#save.image("pc-fire.RData")</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="fu">wt_auth</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Authentication into WildTrax successful.</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Download data</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>burn_projects <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">2291</span>, <span class="dv">282</span>, <span class="dv">662</span>, <span class="dv">672</span>, <span class="dv">1092</span>, <span class="dv">2021</span>, <span class="dv">2878</span>, <span class="dv">3577</span>, <span class="dv">388</span>, <span class="dv">1251</span>, <span class="dv">1252</span>, <span class="dv">1253</span>, <span class="dv">1935</span>, <span class="dv">2879</span>, <span class="dv">2195</span>, <span class="dv">2317</span>, <span class="dv">2286</span>, <span class="dv">2300</span>, <span class="dv">2640</span>, <span class="dv">2282</span>, <span class="dv">3127</span>)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>pf_fire_locs <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"pf-fire-locations.csv"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">year =</span> <span class="fu">year</span>(<span class="fu">parse_date_time</span>(recording_date_time, <span class="at">orders =</span> <span class="fu">c</span>(<span class="st">"mdy HM"</span>)))) <span class="sc">|&gt;</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>recording_date_time) <span class="sc">|&gt;</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>() <span class="sc">|&gt;</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span>location_id <span class="sc">==</span> <span class="dv">489836</span>)</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>burns <span class="ot">&lt;-</span> <span class="fu">wt_get_projects</span>(<span class="st">"ARU"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(project_id <span class="sc">%in%</span> burn_projects) <span class="sc">|&gt;</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(project_id) <span class="sc">|&gt;</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">wt_download_report</span>(<span class="st">'ARU'</span>, <span class="st">'main'</span>) <span class="sc">|&gt;</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bind_rows</span>() <span class="sc">|&gt;</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">year =</span> <span class="fu">year</span>(recording_date_time))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Wrangle</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>burn_locs <span class="ot">&lt;-</span> burns <span class="sc">|&gt;</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(location, location_id, latitude, longitude) <span class="sc">|&gt;</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>() <span class="sc">|&gt;</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(latitude))</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>burn_locs <span class="sc">|&gt;</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">is.na</span>(latitude)) <span class="sc">|&gt;</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(burns <span class="sc">|&gt;</span> <span class="fu">select</span>(project_id, location_id) <span class="sc">|&gt;</span> <span class="fu">distinct</span>(), <span class="at">by =</span> <span class="st">"location_id"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(<span class="fu">wt_get_projects</span>(<span class="st">"ARU"</span>) <span class="sc">|&gt;</span> <span class="fu">select</span>(project_id, organization_name) <span class="sc">|&gt;</span> <span class="fu">distinct</span>(), <span class="at">by =</span> <span class="st">"project_id"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(organization_name, location) <span class="sc">|&gt;</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>() <span class="sc">|&gt;</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">view</span>()</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>burns_fire <span class="ot">&lt;-</span> burns <span class="sc">|&gt;</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(pf_fire_locs, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"location_id"</span>,<span class="st">"year"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Map</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="fu">leaflet</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">addTiles</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">addCircleMarkers</span>(</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> burn_locs,</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">popup =</span> <span class="sc">~</span><span class="fu">paste</span>(<span class="st">"Location:"</span>, location, <span class="st">"&lt;br&gt;"</span>),</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">fillOpacity =</span> <span class="dv">1</span>,</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">"black"</span>, </span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">radius =</span> <span class="dv">6</span> </span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">addMeasure</span>(<span class="at">primaryLengthUnit =</span> <span class="st">"meters"</span>, <span class="at">primaryAreaUnit =</span> <span class="st">"sqmeters"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">addMiniMap</span>(<span class="at">position =</span> <span class="st">"bottomleft"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Assuming "longitude" and "latitude" are longitude and latitude, respectively</code></pre>
+</div>
+<div class="cell-output-display">
+<div class="leaflet html-widget html-fill-item" id="htmlwidget-492fd7636a9df41335f2" style="width:100%;height:464px;"></div>
+<script type="application/json" data-for="htmlwidget-492fd7636a9df41335f2">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addTiles","args":["https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",null,null,{"minZoom":0,"maxZoom":18,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"attribution":"&copy; <a href=\"https://openstreetmap.org/copyright/\">OpenStreetMap<\/a>,  <a href=\"https://opendatacommons.org/licenses/odbl/\">ODbL<\/a>"}]},{"method":"addCircleMarkers","args":[[51.20261,51.194147,51.191015,51.203712,53.684071,53.68382,53.681723,53.679177,53.691718,53.695205,53.698629,53.701011,53.541263,53.544873,53.548125,53.551381,53.710159,53.707549,53.708196,53.710938,53.54299,53.539069,53.535796,53.534393,53.715425,53.712394,53.707656,53.703697,53.706187,53.705774,53.702651,53.701325,53.543525,53.543898,53.544101,53.544237,53.565871,53.56321,53.558427,53.558157,53.569247,53.567247,53.564546,53.562706,53.600581,53.605309,53.611882,53.616784,53.600199,53.603325,53.606037,53.609468,53.656332,53.65302,53.651443,53.647056,53.619642,53.622973,53.624912,53.624885,53.663112,53.659998,53.656873,53.657868,53.630171,53.632128,53.632507,53.631268,53.581057,53.579098,53.581877,53.585215,53.618253,53.616438,53.613145,53.61218,53.62603,53.622975,53.619837,53.619837,53.527117,53.527128,53.527259,53.527267,53.660152,53.657892,53.652581,53.650392,53.629015,53.631618,53.635344,53.636805,53.585116,53.5851,53.584906,53.582952,53.518949,53.523016,53.52568,53.527101,49.121813,49.12742,49.133915,49.135868,49.14477,49.13334,49.1201,49.11933,49.12529,49.13069,60.35861,60.355465,60.357741,60.82495,60.82495,60.806483,60.810704,60.814915,46.781442,46.781921,46.781921,46.779742,46.83209,46.83303,46.83303,46.83855,46.687057,46.686912,46.686205,53.9083,53.90833,53.90924,53.908322,53.909206,53.908339,50.786673,50.786696,50.783963,50.783986,50.784009,50.781254,50.781277,50.7813,50.772964,50.772987,50.770208,50.770232,50.770255,50.770278,50.85981,50.85916,50.850481,50.854524,50.581966,50.854503,50.85388,50.851139,50.67639,50.6733,50.667286,50.662808,50.65892,50.781469,50.786114,50.799094,50.809271,50.793298,50.794184,50.768412,50.768412,50.761916,50.761916,50.765971,50.765971,50.758416,50.758416,50.654977],[-115.538,-115.553593,-115.551259,-115.536692,-112.825066,-112.819558,-112.813293,-112.807331,-112.820689,-112.829119,-112.831469,-112.836089,-112.872073,-112.867445,-112.86612,-112.863852,-112.875619,-112.870386,-112.864034,-112.857994,-112.842475,-112.841295,-112.833494,-112.827835,-112.781915,-112.78198,-112.781656,-112.782901,-112.804531,-112.798123,-112.797738,-112.789354,-112.910077,-112.916946,-112.923483,-112.930253,-112.943174,-112.93942,-112.940298,-112.945989,-112.845282,-112.841263,-112.833298,-112.828473,-112.837858,-112.840113,-112.847292,-112.851997,-112.810548,-112.813697,-112.817647,-112.820039,-112.833982,-112.833841,-112.839654,-112.837792,-112.805492,-112.809458,-112.812925,-112.818752,-112.81939,-112.815773,-112.801311,-112.793755,-112.781534,-112.78575,-112.791279,-112.797692,-112.839901,-112.847106,-112.857888,-112.862985,-112.87702,-112.88448,-112.895152,-112.902184,-112.938478,-112.938918,-112.937789,-112.937789,-112.884245,-112.87663,-112.868798,-112.862153,-112.865338,-112.860978,-112.861402,-112.865822,-112.860251,-112.86638,-112.876661,-112.88422,-112.906352,-112.913474,-112.91966,-112.924989,-112.918542,-112.920662,-112.919361,-112.913845,-107.613535,-107.6117,-107.582849,-107.619121,-107.602627,-107.603646,-107.62035,-107.62732,-107.62582,-107.62629,-137.14162,-137.150033,-137.14829,-138.116595,-138.11491,-138.111839,-138.115098,-138.108141,-73.10856699999999,-73.110928,-73.110928,-73.11318300000001,-73.098691,-73.104069,-73.104069,-73.107178,-73.031727,-73.03455700000001,-73.03589700000001,-106.08714,-106.07411,-106.08174,-106.087023,-106.081687,-106.074084,-99.634489,-99.630233,-99.63658,-99.632324,-99.628069,-99.638671,-99.634415,-99.63016,-99.62869000000001,-99.624436,-99.63928900000001,-99.635035,-99.630781,-99.626527,-100.247618,-100.240269,-100.245409,-100.249125,-100.501328,-100.503313,-100.510525,-100.508959,-100.063763,-100.061,-100.062494,-100.064479,-100.056251,-100.59548,-100.598281,-100.61229,-100.603129,-100.239021,-100.238398,-100.232343,-100.232343,-100.231707,-100.231707,-100.222972,-100.222972,-100.230634,-100.230634,-100.065061],6,null,null,{"interactive":true,"className":"","stroke":true,"color":"black","weight":5,"opacity":0.5,"fill":true,"fillColor":"black","fillOpacity":1},null,null,["Location: CMPDMED-1 <br>","Location: CMPDMED-2 <br>","Location: CMPDMED-3 <br>","Location: CMPDMED-5 <br>","Location: EINP-AMW-11 <br>","Location: EINP-AMW-12 <br>","Location: EINP-AMW-13 <br>","Location: EINP-AMW-14 <br>","Location: EINP-AST-11 <br>","Location: EINP-AST-12 <br>","Location: EINP-AST-13 <br>","Location: EINP-AST-14 <br>","Location: EINP-BAI-11 <br>","Location: EINP-BAI-12 <br>","Location: EINP-BAI-13 <br>","Location: EINP-BAI-14 <br>","Location: EINP-BEA-11 <br>","Location: EINP-BEA-12 <br>","Location: EINP-BEA-13 <br>","Location: EINP-BEA-14 <br>","Location: EINP-BLA-11 <br>","Location: EINP-BLA-12 <br>","Location: EINP-BLA-13 <br>","Location: EINP-BLA-14 <br>","Location: EINP-BOR-11 <br>","Location: EINP-BOR-12 <br>","Location: EINP-BOR-13 <br>","Location: EINP-BOR-14 <br>","Location: EINP-BOR-21 <br>","Location: EINP-BOR-22 <br>","Location: EINP-BOR-23 <br>","Location: EINP-BOR-24 <br>","Location: EINP-CRE-11 <br>","Location: EINP-CRE-12 <br>","Location: EINP-CRE-13 <br>","Location: EINP-CRE-14 <br>","Location: EINP-CRE-21 <br>","Location: EINP-CRE-22 <br>","Location: EINP-CRE-23 <br>","Location: EINP-CRE-24 <br>","Location: EINP-GOO-11 <br>","Location: EINP-GOO-12 <br>","Location: EINP-GOO-13 <br>","Location: EINP-GOO-14 <br>","Location: EINP-HAB-11 <br>","Location: EINP-HAB-12 <br>","Location: EINP-HAB-13 <br>","Location: EINP-HAB-14 <br>","Location: EINP-HAB-21 <br>","Location: EINP-HAB-22 <br>","Location: EINP-HAB-23 <br>","Location: EINP-HAB-24 <br>","Location: EINP-JOR-11 <br>","Location: EINP-JOR-12 <br>","Location: EINP-JOR-13 <br>","Location: EINP-JOR-14 <br>","Location: EINP-JOR-21 <br>","Location: EINP-JOR-22 <br>","Location: EINP-JOR-23 <br>","Location: EINP-JOR-24 <br>","Location: EINP-MOS-11 <br>","Location: EINP-MOS-12 <br>","Location: EINP-MOS-13 <br>","Location: EINP-MOS-14 <br>","Location: EINP-MOS-21 <br>","Location: EINP-MOS-22 <br>","Location: EINP-MOS-23 <br>","Location: EINP-MOS-24 <br>","Location: EINP-MUD-11 <br>","Location: EINP-MUD-12 <br>","Location: EINP-MUD-13 <br>","Location: EINP-MUD-14 <br>","Location: EINP-OST-11 <br>","Location: EINP-OST-12 <br>","Location: EINP-OST-13 <br>","Location: EINP-OST-14 <br>","Location: EINP-OXB-11 <br>","Location: EINP-OXB-12 <br>","Location: EINP-OXB-13 <br>","Location: EINP-OXB-14 <br>","Location: EINP-RAN-11 <br>","Location: EINP-RAN-12 <br>","Location: EINP-RAN-13 <br>","Location: EINP-RAN-14 <br>","Location: EINP-SHL-11 <br>","Location: EINP-SHL-12 <br>","Location: EINP-SHL-13 <br>","Location: EINP-SHL-14 <br>","Location: EINP-SHL-21 <br>","Location: EINP-SHL-22 <br>","Location: EINP-SHL-23 <br>","Location: EINP-SHL-24 <br>","Location: EINP-TAW-11 <br>","Location: EINP-TAW-12 <br>","Location: EINP-TAW-13 <br>","Location: EINP-TAW-14 <br>","Location: EINP-WAL-11 <br>","Location: EINP-WAL-12 <br>","Location: EINP-WAL-13 <br>","Location: EINP-WAL-14 <br>","Location: GNP-TS-1 <br>","Location: GNP-TS-10 <br>","Location: GNP-TS-2 <br>","Location: GNP-TS-3 <br>","Location: GNP-TS-4 <br>","Location: GNP-TS-5 <br>","Location: GNP-TS-6 <br>","Location: GNP-TS-7 <br>","Location: GNP-TS-8 <br>","Location: GNP-TS-9 <br>","Location: AC-C2 <br>","Location: AC-T1 <br>","Location: AC-T2 <br>","Location: JR-C1 <br>","Location: JR-C2 <br>","Location: JR-T1 <br>","Location: JR-T2 <br>","Location: JR-T3 <br>","Location: LMNP-GEN-1 <br>","Location: LMNP-GEN-2 <br>","Location: LMNP-GEN-2-2 <br>","Location: LMNP-GEN-3 <br>","Location: LMNP-HAM-1 <br>","Location: LMNP-HAM-2 <br>","Location: LMNP-HAM-2-2 <br>","Location: LMNP-HAM-3 <br>","Location: LMNP-MOD-1 <br>","Location: LMNP-MOD-2 <br>","Location: LMNP-MOD-3 <br>","Location: ARU4 <br>","Location: ARU5 <br>","Location: ARU6 <br>","Location: ASU1 <br>","Location: ASU2 <br>","Location: ASU3 <br>","Location: FE17 <br>","Location: FE18 <br>","Location: FE19 <br>","Location: FE20 <br>","Location: FE21 <br>","Location: FE22 <br>","Location: FE23 <br>","Location: FE24 <br>","Location: FE35 <br>","Location: FE360000 <br>","Location: FE370080 <br>","Location: FE3800 <br>","Location: FE390000 <br>","Location: FE40 <br>","Location: FE50 <br>","Location: FE51 <br>","Location: FE52 <br>","Location: FE53 <br>","Location: FE54 <br>","Location: FE55 <br>","Location: FE56 <br>","Location: FE57 <br>","Location: SL01 <br>","Location: SL02 <br>","Location: SL03 <br>","Location: SL04 <br>","Location: SL05 <br>","Location: BA01 <br>","Location: BA02 <br>","Location: BA06 <br>","Location: BA09 <br>","Location: LA01 <br>","Location: LA01_2022_S4A13082 <br>","Location: LA02 <br>","Location: LA02_2022_S4A13082 <br>","Location: LA03 <br>","Location: LA03_2022_S4A13082 <br>","Location: LA04 <br>","Location: LA04_2022_S4A13082 <br>","Location: LA07 <br>","Location: LA07_2022_S4A13082 <br>","Location: SL06 <br>"],null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]},{"method":"addMeasure","args":[{"position":"topright","primaryLengthUnit":"meters","primaryAreaUnit":"sqmeters","activeColor":"#ABE67E","completedColor":"#C8F2BE","popupOptions":{"className":"leaflet-measure-resultpopup","autoPanPadding":[10,10]},"captureZIndex":10000,"localization":"en","decPoint":".","thousandsSep":","}]},{"method":"addMiniMap","args":[null,null,"bottomleft",150,150,19,19,-5,false,false,false,false,false,false,{"color":"#ff7800","weight":1,"clickable":false},{"color":"#000000","weight":1,"clickable":false,"opacity":0,"fillOpacity":0},{"hideText":"Hide MiniMap","showText":"Show MiniMap"},[]]}],"limits":{"lat":[46.686205,60.82495],"lng":[-138.116595,-73.031727]}},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Covariates</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>covs <span class="ot">&lt;-</span> burns_fire <span class="sc">|&gt;</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(<span class="fu">wt_get_projects</span>(<span class="st">"ARU"</span>) <span class="sc">|&gt;</span> <span class="fu">select</span>(organization_name, project, project_id), <span class="at">by =</span> <span class="st">"project_id"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(organization_name, project, project_id, location, location_id, year, sample_type, freq_burned, yrs_since_fire, pf_severity, veg_type) <span class="sc">|&gt;</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>()</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>covs <span class="sc">|&gt;</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(organization_name, project, project_id, year)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 26 × 5
+   organization_name project                              project_id  year     n
+   &lt;chr&gt;             &lt;chr&gt;                                     &lt;int&gt; &lt;dbl&gt; &lt;int&gt;
+ 1 BNP               Prescribed Burn - Compound Meadows …       2291  2023     2
+ 2 BNP               Prescribed Burn - Compound Meadows …       2291  2024     4
+ 3 EINP              Elk Island National Park Forest Bir…        282  2019    96
+ 4 EINP              Elk Island National Park Forest Bir…        662  2020    96
+ 5 EINP              Elk Island National Park Forest Bir…        672  2021    96
+ 6 EINP              Elk Island National Park Forest Bir…       1092  2022    96
+ 7 EINP              Elk Island National Park Forest Bir…       2021  2023    96
+ 8 EINP              Elk Island National Park Forest Bir…       2878  2024    94
+ 9 EINP              Elk Island National Park Forest Bir…       3577  2025    96
+10 EINP              Elk Island National Park Grassland …        388  2019    20
+# ℹ 16 more rows</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>covs <span class="sc">|&gt;</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(veg_type)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 7 × 2
+  veg_type      n
+  &lt;chr&gt;     &lt;int&gt;
+1 boreal       11
+2 grassland    18
+3 mixedwood    50
+4 montane       5
+5 parkland     12
+6 subalpine     2
+7 &lt;NA&gt;        802</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>covs <span class="sc">|&gt;</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(location, year) <span class="sc">|&gt;</span> </span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(n<span class="sc">&gt;</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 0 × 3
+# ℹ 3 variables: location &lt;chr&gt;, year &lt;dbl&gt;, n &lt;int&gt;</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>shannon_d <span class="ot">&lt;-</span> burns_fire <span class="sc">|&gt;</span> </span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">wt_tidy_species</span>(<span class="at">remove =</span> <span class="fu">c</span>(<span class="st">"mammal"</span>,<span class="st">"amphibian"</span>,<span class="st">"abiotic"</span>,<span class="st">"insect"</span>,<span class="st">"unknown"</span>), <span class="at">zerofill =</span> F) <span class="sc">|&gt;</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">inner_join</span>(<span class="fu">wt_get_species</span>() <span class="sc">|&gt;</span> dplyr<span class="sc">::</span><span class="fu">select</span>(species_code, species_class, species_order), <span class="at">by =</span> <span class="st">"species_code"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(location, location_id, recording_date_time, species_code, species_common_name, individual_order, abundance) <span class="sc">|&gt;</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>() <span class="sc">|&gt;</span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(location, location_id, recording_date_time, species_code, species_common_name) <span class="sc">|&gt;</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">count =</span> <span class="fu">max</span>(individual_order)) <span class="sc">|&gt;</span></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">|&gt;</span></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> species_code, <span class="at">values_from =</span> count, <span class="at">values_fill =</span> <span class="dv">0</span>) <span class="sc">|&gt;</span></span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="sc">-</span>(location<span class="sc">:</span>species_common_name), <span class="at">names_to =</span> <span class="st">"species"</span>, <span class="at">values_to =</span> <span class="st">"count"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(location, location_id, <span class="at">year =</span> <span class="fu">year</span>(recording_date_time), species) <span class="sc">|&gt;</span></span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">total_count =</span> <span class="fu">sum</span>(count)) <span class="sc">|&gt;</span></span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">|&gt;</span></span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(location, location_id, year) <span class="sc">|&gt;</span></span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">shannon_index =</span> <span class="fu">diversity</span>(total_count, <span class="at">index =</span> <span class="st">"shannon"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">|&gt;</span></span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(covs <span class="sc">|&gt;</span> <span class="fu">select</span>(location_id<span class="sc">:</span>veg_type), <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"location_id"</span>,<span class="st">"year"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`summarise()` has grouped output by 'location', 'location_id',
+'recording_date_time', 'species_code'. You can override using the `.groups`
+argument.
+`summarise()` has grouped output by 'location', 'location_id', 'year'. You can
+override using the `.groups` argument.
+`summarise()` has grouped output by 'location', 'location_id'. You can override
+using the `.groups` argument.</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>shannon_d <span class="sc">|&gt;</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(shannon_index), <span class="sc">!</span><span class="fu">is.na</span>(veg_type)) <span class="sc">|&gt;</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">factor</span>(year), <span class="at">y =</span> shannon_index, <span class="at">fill =</span> <span class="fu">factor</span>(year))) <span class="sc">+</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>() <span class="sc">+</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.6</span>, <span class="at">colour =</span> <span class="st">"grey"</span>) <span class="sc">+</span></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Year"</span>,</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Shannon diversity index per location"</span>) <span class="sc">+</span></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">guides</span>(<span class="at">fill =</span> <span class="fu">guide_legend</span>(<span class="at">title =</span> <span class="st">"Year"</span>)) <span class="sc">+</span></span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_viridis_d</span>(<span class="at">alpha =</span> <span class="fl">0.8</span>, <span class="at">option =</span> <span class="st">"cividis"</span>) <span class="sc">+</span></span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> veg_type)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="pc-fire_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>shannon_d <span class="sc">|&gt;</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(shannon_index), <span class="sc">!</span><span class="fu">is.na</span>(sample_type), <span class="sc">!</span><span class="fu">is.na</span>(veg_type)) <span class="sc">|&gt;</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">sample_type =</span> <span class="fu">factor</span>(sample_type, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"pre-burn"</span>, <span class="st">"post-burn"</span>))) <span class="sc">|&gt;</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> sample_type, <span class="at">y =</span> shannon_index, <span class="at">fill =</span> sample_type)) <span class="sc">+</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>(<span class="at">outlier.shape =</span> <span class="cn">NA</span>, <span class="at">alpha =</span> <span class="fl">0.8</span>) <span class="sc">+</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_jitter</span>(<span class="at">width =</span> <span class="fl">0.2</span>, <span class="at">alpha =</span> <span class="fl">0.6</span>, <span class="at">color =</span> <span class="st">"grey40"</span>) <span class="sc">+</span></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> veg_type, <span class="at">scales =</span> <span class="st">"free_y"</span>) <span class="sc">+</span></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_viridis_d</span>(<span class="at">option =</span> <span class="st">"cividis"</span>, <span class="at">end =</span> <span class="fl">0.8</span>) <span class="sc">+</span></span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Burn Status"</span>,</span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Shannon Diversity Index"</span>,</span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">"Sample Type"</span>,</span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Shannon Diversity Pre- and Post-Burn by Vegetation Type"</span></span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>(<span class="at">base_size =</span> <span class="dv">14</span>) <span class="sc">+</span></span>
+<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
+<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.position =</span> <span class="st">"bottom"</span></span>
+<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="pc-fire_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
 
 </main>
 <!-- /main column -->
