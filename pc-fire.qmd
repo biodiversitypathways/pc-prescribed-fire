@@ -43,13 +43,13 @@ wt_auth()
 ```{r, eval = F, include = T}
 # Download data
 
-burn_projects <- c(2291, 282, 662, 672, 1092, 2021, 2878, 3577, 388, 1251, 1252, 1253, 1935, 2879, 2195, 2317, 2286, 2300, 2640, 2282, 3127)
+burn_projects <- c(2291, 282, 662, 672, 1092, 2021, 2878, 3577, 388, 1251, 1252, 1253, 1935, 2879, 2195, 2317, 2286, 2300, 2640, 2282, 3127, 4091)
 
 pf_fire_locs <- read_csv("pf-fire-locations.csv") |>
   mutate(year = year(parse_date_time(recording_date_time, orders = c("mdy HM")))) |>
   select(-recording_date_time) |>
   distinct() |>
-  filter(!location_id == 489836)
+  filter(!location_id == 489836) 
 
 burns <- wt_get_projects("ARU") |>
   filter(project_id %in% burn_projects) |>
@@ -121,6 +121,81 @@ covs |>
   filter(n>1)
 
 ```
+
+```{r}
+
+c_p <- covs |>
+  filter(!is.na(sample_type)) |>
+  group_by(location_id) |>
+  filter(all(c("pre-burn", "post-burn") %in% sample_type)) |>
+  ungroup() |>
+  select(location_id) |>
+  distinct() |>
+  pull()
+
+prepost <- burns_fire |>
+  filter(location_id %in% c_p) |>
+  group_by(location_id, year, sample_type) |>
+  summarise(
+    richness = n_distinct(species_code),
+    .groups = "drop"
+  ) %>%
+  group_by(location_id, sample_type) %>%
+  summarise(mean_richness = mean(richness), .groups = "drop") %>%
+  tidyr::pivot_wider(names_from = sample_type, values_from = mean_richness)
+
+wilcox.test(prepost$`pre-burn`,
+            prepost$`post-burn`,
+            paired = TRUE)
+
+prepost %>%
+  select(location_id, `pre-burn`, `post-burn`) %>%
+  pivot_longer(
+    cols = c(`pre-burn`, `post-burn`),
+    names_to = "sample_type",
+    values_to = "value"
+  ) |>
+  mutate(
+    sample_type = factor(sample_type,
+                         levels = c("pre-burn", "post-burn"))
+  ) |>
+  ggplot(aes(x = sample_type, y = value, group = location_id)) +
+  geom_line(alpha = 0.4) +
+  geom_point(size = 2) +
+  stat_summary(
+    fun = median,
+    geom = "point",
+    size = 4,
+    shape = 18
+  ) +
+  labs(
+    x = NULL,
+    y = "Response value",
+    title = "Paired pre- and post-burn comparison"
+  ) +
+  theme_bw()
+
+```
+
+
+```{r}
+
+comm_long <- burns_fire %>%
+  filter(location_id %in% c_p) %>%
+  filter(sample_type %in% c("pre-burn", "post-burn")) %>%
+  group_by(location_id, year, sample_type, veg_type, species_code) %>%
+  summarise(abundance = n(), .groups = "drop")
+
+comm_mat <- comm_long %>%
+  unite(site_id, location_id, year, sample_type, remove = FALSE) %>%
+  pivot_wider(
+    names_from = species_code,
+    values_from = abundance,
+    values_fill = 0
+  )
+
+```
+
 
 # Results
 
