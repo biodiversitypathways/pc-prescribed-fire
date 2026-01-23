@@ -31,6 +31,7 @@ This is a test
 library(wildrtrax)
 library(tidyverse)
 library(sf)
+library(ggrepel)
 library(leaflet)
 library(vegan)
 
@@ -58,10 +59,23 @@ burns <- wt_get_projects("ARU") |>
   bind_rows() |>
   mutate(year = year(recording_date_time))
 
+parks <- read_sf("./assets/National_Parks_and_National_Park_Reserves_of_Canada_Legislative_Boundaries.shp") |>
+  st_transform(4326) |>
+  st_make_valid()
+
+parks_fire <- st_join(burn_sf, parks, join = st_intersects) |>
+  dplyr::filter(!is.na(adminAreaI)) |>
+  st_drop_geometry() |>
+  select(adminAreaN) |>
+  distinct() |>
+  pull()
+
+parks <- parks |> filter(adminAreaN %in% parks_fire)
 
 ```
 
 # Introduction
+
 
 
 # Methods
@@ -74,13 +88,14 @@ burn_locs <- burns |>
   distinct() |>
   filter(!is.na(latitude))
 
+burn_sf <- st_as_sf(burn_locs, coords = c("longitude","latitude"), crs = 4326)
+
 burn_locs |>
-  filter(is.na(latitude)) |>
+  filter(!is.na(latitude)) |>
   left_join(burns |> select(project_id, location_id) |> distinct(), by = "location_id") |>
   left_join(wt_get_projects("ARU") |> select(project_id, organization_name) |> distinct(), by = "project_id") |>
   select(organization_name, location) |>
-  distinct() |>
-  view()
+  distinct()
 
 burns_fire <- burns |>
   left_join(pf_fire_locs, by = c("location_id","year"))
@@ -92,14 +107,23 @@ burns_fire <- burns |>
 
 leaflet() %>%
   addTiles() %>%
+  addPolygons(
+    data = parks,
+    popup = ~adminAreaN,
+    fillOpacity = 0.4,
+    color = "green"
+  ) %>%
   addCircleMarkers(
     data = burn_locs,
-    popup = ~paste("Location:", location, "<br>"),
+    lng = ~longitude,
+    lat = ~latitude,
+    popup = ~paste("Location:", location),
     fillOpacity = 1,
-    color = "black", 
-    radius = 6 
+    color = "black",
+    radius = 6
   ) %>%
-  addMeasure(primaryLengthUnit = "meters", primaryAreaUnit = "sqmeters") %>%
+  addMeasure(primaryLengthUnit = "meters",
+             primaryAreaUnit = "sqmeters") %>%
   addMiniMap(position = "bottomleft")
 
 ```
@@ -135,12 +159,12 @@ c_p <- covs |>
 
 prepost <- burns_fire |>
   filter(location_id %in% c_p) |>
-  group_by(location_id, year, sample_type) |>
+  group_by(organization, location, location_id, year, sample_type) |>
   summarise(
     richness = n_distinct(species_code),
     .groups = "drop"
   ) %>%
-  group_by(location_id, sample_type) %>%
+  group_by(organization, location, location_id, sample_type) %>%
   summarise(mean_richness = mean(richness), .groups = "drop") %>%
   tidyr::pivot_wider(names_from = sample_type, values_from = mean_richness)
 
@@ -149,7 +173,7 @@ wilcox.test(prepost$`pre-burn`,
             paired = TRUE)
 
 prepost %>%
-  select(location_id, `pre-burn`, `post-burn`) %>%
+  select(organization, location, location_id, `pre-burn`, `post-burn`) %>%
   pivot_longer(
     cols = c(`pre-burn`, `post-burn`),
     names_to = "sample_type",
@@ -159,18 +183,17 @@ prepost %>%
     sample_type = factor(sample_type,
                          levels = c("pre-burn", "post-burn"))
   ) |>
-  ggplot(aes(x = sample_type, y = value, group = location_id)) +
+  ggplot(aes(x = sample_type, y = value, group = location_id, colour = organization)) +
   geom_line(alpha = 0.4) +
   geom_point(size = 2) +
   stat_summary(
     fun = median,
     geom = "point",
-    size = 4,
-    shape = 18
+    size = 4
   ) +
   labs(
     x = NULL,
-    y = "Response value",
+    y = "Species richness",
     title = "Paired pre- and post-burn comparison"
   ) +
   theme_bw()
@@ -191,8 +214,44 @@ comm_mat <- comm_long %>%
   pivot_wider(
     names_from = species_code,
     values_from = abundance,
-    values_fill = 0
-  )
+    values_fill = 0)
+
+multi_type <- comm_mat  %>%
+  dplyr::select(site_id, location_id, year, sample_type, veg_type) %>%
+  distinct() %>%
+  drop_na()
+
+t3 <- rda(comm_mat[,-c(1:5)] ~ sample_type + veg_type, data = multi_type)
+t3scores <- scores(t3, display = "sites") %>%
+as.data.frame() %>%
+rownames_to_column("site") %>%
+bind_cols(., multi_type)
+t3vect <- scores(t3, display = "species") %>%
+as.data.frame()
+
+plot_RDA <- ggplot(data = t3scores, aes(x = RDA1, y = RDA2)) +
+  geom_point(data = t3scores, aes(x = RDA1, y = RDA2, colour = veg_type), 
+             alpha = 0.7, size = 3, shape = 16) +
+  stat_ellipse(data = t3scores, aes(colour = sample_type), 
+               linetype = 1, type = 'norm', level = 0.67, size = 1) +
+  geom_vline(xintercept = 0, color = "#A19E99", linetype = 2, size = 1) +
+  geom_hline(yintercept = 0, color = "#A19E99", linetype = 2, size = 1) +
+  geom_segment(data = t3vect, aes(x = 0, y = 0, xend = RDA1, yend = RDA2), 
+               arrow = arrow(length = unit(0.2, "cm")), size = 0.3) +
+  geom_text_repel(data = t3vect, aes(x = RDA1, y = RDA2, label = rownames(t3vect)), 
+                  size = 3, colour = "black", fontface = "italic", 
+                  max.overlaps = 10, 
+                  segment.color = "grey70") +
+  theme_bw() +
+  scale_colour_viridis_d(option = "cividis", end = 0.9) +
+  labs(x = "RDA1", y = "RDA2", title = "Species-fire associations", 
+       colour = "Sample Type") +
+  theme(legend.position = "right", 
+        legend.title = element_text(size = 10), 
+        legend.text = element_text(size = 9), 
+        plot.title = element_text(hjust = 0.5, size = 14, face = "bold"))
+
+plot_RDA
 
 ```
 
