@@ -1,5 +1,5 @@
 ---
-title: "Report on the use of prescribed fire on bird communities in Canada's National Parks"
+title: "Report and assessment of prescribed fire effects on bird communities in Canada’s National Parks"
 format:
   html:
     grid:
@@ -24,9 +24,15 @@ styles: styles.css
 github: https://github.com/biodiversitypathways/pc-prescribed-fire
 ---
 
-This is a test
+![](assets/prescribed-fire.png){style="float:left`;" fig-alt="Photo of Jasper" fig-align="center"}
 
 ```{r}
+#| label: Load packages and authenticate to WildTrax
+#| include: false
+#| echo: false
+#| eval: true
+#| warning: false
+#| message: false
 
 library(wildrtrax)
 library(tidyverse)
@@ -34,23 +40,43 @@ library(sf)
 library(ggrepel)
 library(leaflet)
 library(vegan)
+library(kableExtra)
+library(DT)
 
 load("pc-fire.RData")
-#save.image("pc-fire.RData")
+save.image("pc-fire.RData")
 
 wt_auth()
 ```
 
-```{r, eval = F, include = T}
+```{r}
+#| include: false
+#| echo: false
+#| eval: false
+#| warning: false
+#| message: false
 # Download data
 
-burn_projects <- c(2291, 282, 662, 672, 1092, 2021, 2878, 3577, 388, 1251, 1252, 1253, 1935, 2879, 2195, 2317, 2286, 2300, 2640, 2282, 3127, 4091)
+burn_projects <- c(2291, 282, 662, 672, 1092, 2021, 2878, 3577, 388, 1251, 1252, 1253, 1935, 2879, 2195, 2317, 2286, 2300, 2640, 2282, 3127, 4091, 3938, 3736, 3249)
+
+einps <- wt_get_projects('ARU') |> filter(grepl('Elk Island',project), !project_id %in% burn_projects) |> pull(project_id)
+
+burns_projects <- c(burn_projects, einps)
 
 pf_fire_locs <- read_csv("pf-fire-locations.csv") |>
   mutate(year = year(parse_date_time(recording_date_time, orders = c("mdy HM")))) |>
   select(-recording_date_time) |>
   distinct() |>
-  filter(!location_id == 489836) 
+  filter(!location_id == 489836) |>
+  inner_join(burns |> select(location, location_id) |> distinct(), by = c("location_id"))
+
+elk_burns <- read_csv("elk_island_burns.csv") |>
+  rename(location = PointID) |>
+  mutate(location = paste0("EINP-",location),
+         location = sub("(\\D)(\\d{2})$", "\\1-\\2", location)) |>
+  mutate(location = gsub("-0([0-9])", "-\\1", location)) |>
+  select(location, Year_Burned, lastBurned) |>
+  distinct()
 
 burns <- wt_get_projects("ARU") |>
   filter(project_id %in% burn_projects) |>
@@ -74,14 +100,34 @@ parks <- parks |> filter(adminAreaN %in% parks_fire)
 
 ```
 
+::: {.callout-note collapse="true" style="background-color: #f4f4f4; padding: 20px;"}
+This report is dynamically generated, meaning its results may evolve with the addition of new data or further analyses. For the most recent updates, refer to the publication date and feel free to reach out to the authors.
+:::
+
+# Abstract
+
+Ecologists use prescribed fire as a management tool to maintain and restore ecosystem structure, composition, and function, particularly in fire-adapted landscapes. In Canada’s national parks, prescribed fire is increasingly used to reduce fuel loads, promote habitat heterogeneity, and support biodiversity objectives. However, understanding how bird communities respond to prescribed fire remains essential for evaluating both ecological benefits and potential impacts. Over the past three years, Parks Canada has collected standardized bird survey data within prescribed fire areas across `r length(unique(burns$organization))` national parks, encompassing `r length(unique(burns$location))` sampling locations and approximately `r nrow(burns)` species observation records. This report presents brief summary analyses of these data to characterize migratory bird communities before and after prescribed fire in terms of species composition, functional communities and richness. In addition, the analysis evaluates differences between pre- and post-fire conditions and assesses the effectiveness of the sampling design, including its ability to detect change and its statistical power. The results are intended to help guide future bird monitoring efforts within Parks Canada for adaptive fire management practices. 
+
+# Land Acknowledgement
+
 # Introduction
 
+Ecologists use prescribed fire as a deliberate and carefully planned management practice to mimic natural disturbance regimes, reduce accumulated fuels, and promote ecological processes that sustain biodiversity. In many forested and grassland ecosystems, periodic fire plays a critical role in shaping vegetation structure, influencing habitat availability, and maintaining species assemblages. Prescribed fires are therefore widely used to support conservation objectives, particularly in protected areas where maintaining ecological integrity is a primary mandate. Within Parks Canada, prescribed fire is a key component of wildland fire management. The PCA Fire Management Program coordinates fire management planning and operations across lands within the Parks Canada network, including the design and implementation of prescribed fires. While prescribed fire is expected to provide long-term ecological benefits, short- and medium-term responses of wildlife, particularly migratory birds, can vary depending on fire timing, intensity, extent, and pre-fire habitat conditions. As a result, systematic monitoring is required to evaluate both potential impacts and benefits of fire management actions.
 
+Over the past three years, Parks Canada staff have conducted bird surveys within prescribed fire areas to assess how migratory bird communities respond to fire. This dataset provides an opportunity to examine changes in bird species composition, functional communities and richness before and after prescribed fire, as well as to evaluate variation across parks and fire events. The primary objective of this report is to describe and compare migratory bird communities before and after prescribed fire and to assess whether detectable differences are evident in species-level and community-level metrics. A secondary objective is to evaluate the sampling strategy used, including its capacity to characterize bird communities and its statistical power to detect or model changes associated with prescribed fire. The results of this work will support Parks Canada in interpreting the ecological outcomes of prescribed fire and in refining future monitoring and fire management practices.
 
 # Methods
 
+## Data collection
+
+Data were collected using passive autonomous recording units (ARUs; @Shonfield2017) at `r length(unique(burns$location))` (@fig-aru-monitoring-locations). Recordings were summarized by month and organization to characterize the temporal distribution of sampling effort across parks and years (@fig-recordings-locations. Sampling occurred primarily during the breeding season (April–July), with the majority of effort concentrated in June. Temporal coverage varied among organizations, with some parks sampled in single years and others sampled repeatedly across multiple years. Monthly sample sizes ranged from low replication in some early or late-season deployments to higher levels of effort in core sampling months, reflecting differences in deployment timing, park-level logistics, and program objectives.
+
 ```{r}
-# Wrangle
+#| include: false
+#| echo: false
+#| eval: false
+#| warning: false
+#| message: false
 
 burn_locs <- burns |>
   select(location, location_id, latitude, longitude) |>
@@ -97,13 +143,34 @@ burn_locs |>
   select(organization_name, location) |>
   distinct()
 
-burns_fire <- burns |>
-  left_join(pf_fire_locs, by = c("location_id","year"))
+burns_fire <- burns |> 
+  left_join(elk_burns |> group_by(location) |> summarise(lastBurned = max(lastBurned, na.rm = TRUE)), by = "location") |>
+  mutate(years_since_fire = as.numeric(year(recording_date_time) - lastBurned)) |>
+  left_join(pf_fire_locs |> select(-location), by = c("location_id","year")) |>
+  mutate(years_since_fire = coalesce(years_since_fire, as.numeric(yrs_since_fire)))
 
+year_levels <- c("2019","2020","2021","2022","2023","2024","2025")
+
+locs_summary <- burns |>
+  group_by(organization, location, year) |>
+  summarise(n = n_distinct(recording_date_time), .groups = "drop") |>
+  pivot_wider(
+    names_from  = year,
+    values_from = n,
+    values_fill = 0
+  ) |>
+  relocate(all_of(year_levels), .after = location)
 ```
 
 ```{r}
-# Map
+#| echo: false
+#| eval: true
+#| warning: false
+#| message: false
+#| include: true
+#| fig-align: center
+#| fig-cap: Locations from Jasper National Park ARU EI Monitoring Program.
+#| label: fig-aru-monitoring-locations
 
 leaflet() %>%
   addTiles() %>%
@@ -129,11 +196,127 @@ leaflet() %>%
 ```
 
 ```{r}
+#| echo: false
+#| eval: true
+#| warning: false
+#| message: false
+#| include: true
+#| fig-align: center
+#| fig-cap: Locations from Jasper National Park ARU EI Monitoring Program.
+#| label: fig-recordings-locations
+
+burns %>%
+  distinct(organization, recording_id, recording_date_time) %>%
+  mutate(month = lubridate::floor_date(recording_date_time, "month")) %>%
+  count(organization, month) %>%
+  ggplot(aes(month, organization, fill = n)) +
+  geom_tile() +
+  scale_fill_viridis_c(name = "Recordings", option = "plasma") +
+  labs(
+    x = "Month",
+    y = "Park",
+    title = "Temporal distribution of recording effort by Park"
+  ) +
+  scale_x_date(
+    date_breaks = "1 year",
+    date_labels = "%Y"
+  ) +
+  theme_minimal()
+
+```
+
+```{r}
+#| warning: false
+#| echo: true
+#| eval: true
+#| message: false
+#| include: true
+#| label: tbl-loc-summary
+#| collapse: true
+#| code-fold: true
+#| tbl-cap: Locations surveyed across years with count of recordings collected per location.
+
+datatable(locs_summary, 
+          options = list(
+            searching = TRUE,  
+            paging = TRUE,    
+            pageLength = 10   
+          )) |>
+  formatStyle(columns = colnames(locs_summary), 
+              backgroundColor = styleEqual(c("NA"), "lightgray"))  
+```
+
+## Data management and processing
+
+The principal goal for data processing was to describe the acoustic community of species heard at locations while choosing a large enough subset of recordings for analyses. Data processing was completed in WildTrax with tags made using count-removal (see @farnsworth2002removal, @time-removal) where tags are only made at the time of first detection of each individual heard on the recordings (MacPhail et al. 2026 *In Review*). We also verified that all tags that were created were checked by a second observer (n = `r verified_tags |> select(Proportion) |> slice(2) |> pull()`) to ensure accuracy of detections. If amphibians were detected, abundance was estimated at the time of first detection using the [North American Amphibian Monitoring Program](https://www.usgs.gov/centers/eesc/science/north-american-amphibian-monitoring-program) with abundance of species being estimated on the scale of "calling intensity index" (CI) of 1 - 3. Mammals such as Red Squirrel, were also noted on the recordings. After the data are processed in WildTrax, the [wildrtrax](https://abbiodiversity.github.io/wildrtrax/) package is use to download the data into a standard format prepared for analysis. The `wt_download_report()` function downloads the data directly to a R framework for easy manipulation (see [wildrtrax APIs](https://abbiodiversity.github.io/wildrtrax/articles/apis.html)).
+
+```{r}
+#| include: false
+#| echo: false
+#| eval: true
+#| warning: false
+#| message: false
+
+ggplot(burns, aes(x = organization, y = task_duration, color = task_method)) +
+  geom_jitter(width = 0.2, height = 0, size = 3, alpha = 0.8) +
+  labs(y = "Task Duration", x = "Organization", color = "Method") +
+  theme_minimal() +
+  facet_wrap(~task_method, ncol = 1)
+
+
+
+```
+
+```{r}
+#| include: false
+#| echo: false
+#| eval: true
+#| warning: false
+#| message: false
+
+all_tags <- burns |> 
+  tally() |>
+  pull()
+
+verified_tags <- burns |>
+  group_by(tag_is_verified) |>
+  tally() |>
+  mutate(Proportion = round(n / all_tags,4)*100) |>
+  rename("Count" = n) |>
+  rename("Tag is verified" = tag_is_verified)
+
+verified_tags
+
+```
+
+
+## Analysis
+
+We examined how species abundance varied with time since fire and site characteristics (@fig-tsf). Data were filtered to include relevant columns and distinct observations of species and abundance. For visualization, total and mean species abundances were summarized by years since fire. To test for statistical effects, a generalized linear model (GLM) with a Poisson distribution was fit, using individual abundance as the response variable and years since fire, vegetation type, and fire frequency as explanatory variables. This approach allowed us to assess the influence of fire history and site characteristics on species abundance.
+
+We compared species richness between pre-burn and post-burn surveys at locations of interest (@fig-paired). For each location, year, and sample type, richness was calculated as the number of unique species observed. Mean richness per location was then computed across years. Paired differences between pre- and post-burn richness were tested using a Wilcoxon signed-rank test. Data were visualized with lines connecting pre- and post-burn values for each location, points for individual observations, and median values highlighted to illustrate paired changes across burn events.
+
+We used redundancy analysis (RDA) to examine how species composition varied with burn status and vegetation type (@fig-community). Data were restricted to locations of interest and to pre- and post-burn samples. For each location, year, sample type, and vegetation type, species abundances were calculated as the number of occurrences per species. Data were then converted to a site-by-species matrix, with missing species values filled as zero. RDA was performed using sample type and vegetation type as explanatory variables. Site scores and species scores were extracted for visualization. The resulting RDA plot displays sites colored by vegetation type, ellipses representing burn status, and species vectors illustrating associations with axes. This approach highlights shifts in community composition associated with fire and vegetation characteristics.
+
+We calculated the Shannon diversity index for each surveyed location and year to quantify species diversity. Only vertebrate species (excluding mammals, amphibians, insects, abiotic, and unknown detections) were retained. For each recording, the maximum observed abundance per species was recorded. Data were then aggregated by location and year to produce a species-by-location abundance matrix. Shannon diversity was calculated from these totals using the `diversity` function, and results were combined with vegetation type metadata for each site. Diversity patterns across years were visualized and grouped by Park (@fig-shannon) Shannon diversity index was compared between pre-burn and post-burn surveys at each location. Only sites with known vegetation type and sample type were included (@fig-shannon-pre-post).
+
+# Results
+
+::: {.callout-note collapse="true" style="background-color: #f4f4f4; padding: 20px;"}
+Some of these analyses are still a work-in-progress. Check back soon for updates and additional details.
+:::
+
+```{r}
+#| include: false
+#| echo: false
+#| eval: true
+#| warning: false
+#| message: false
 # Covariates
 
 covs <- burns_fire |>
   left_join(wt_get_projects("ARU") |> select(organization_name, project, project_id), by = "project_id") |>
-  select(organization_name, project, project_id, location, location_id, year, sample_type, freq_burned, yrs_since_fire, pf_severity, veg_type) |>
+  select(organization_name, project, project_id, location, location_id, year, sample_type, freq_burned, yrs_since_fire, years_since_fire, lastBurned, pf_severity, veg_type) |>
   distinct()
 
 covs |>
@@ -147,6 +330,13 @@ covs |>
 ```
 
 ```{r}
+#| include: true
+#| echo: false
+#| eval: true
+#| warning: false
+#| message: false
+#| label: fig-paired
+#| tbl-cap: Paired comparison of species richness before and after fire. Lines connect values from the same location, points show individual observations, and median values are highlighted.
 
 c_p <- covs |>
   filter(!is.na(sample_type)) |>
@@ -200,8 +390,57 @@ prepost %>%
 
 ```
 
+```{r}
+#| include: true
+#| echo: false
+#| eval: true
+#| warning: false
+#| message: false
+#| label: fig-tsf
+#| tbl-cap: Species abundance in relation to years since fire, vegetation type, and fire frequency.
+
+tsf <- burns_fire |>
+  select(location, year, years_since_fire, yrs_since_fire, lastBurned, freq_burned, pf_severity, veg_type, species_code, individual_order, abundance) |>
+  distinct()
+
+tsf_summary <- tsf %>%
+  group_by(years_since_fire) %>%
+  summarise(
+    total_abundance = max(individual_order),
+    mean_abundance  = mean(individual_order),
+    n_records       = n()
+  )
+
+ggplot(tsf_summary, aes(x = years_since_fire, y = total_abundance)) +
+  geom_point() +
+  labs(
+    x = "Years Since Fire",
+    y = "Total Abundance",
+    title = "Species Abundance vs Time Since Fire"
+  ) +
+  theme_minimal()
+
+tsf_summary2 <- tsf %>%
+  group_by(years_since_fire, veg_type, freq_burned) %>%
+  summarise(
+    total_abundance = max(individual_order),
+    .groups = "drop"
+  )
+
+glm_abundance <- glm(individual_order ~ years_since_fire + veg_type + freq_burned,
+                     family = poisson,
+                     data = tsf)
+#summary(glm_abundance)
+```
 
 ```{r}
+#| include: true
+#| echo: false
+#| eval: true
+#| warning: false
+#| message: false
+#| label: fig-community
+#| tbl-cap: Species community matrix
 
 comm_long <- burns_fire %>%
   filter(location_id %in% c_p) %>%
@@ -256,29 +495,33 @@ plot_RDA
 ```
 
 
-# Results
-
 ```{r}
+#| include: true
+#| echo: false
+#| eval: true
+#| warning: false
+#| message: false
+#| label: fig-shannon
+#| tbl-cap: Shannon Diversity Index by location and year for park surveys
 
 shannon_d <- burns_fire |> 
   wt_tidy_species(remove = c("mammal","amphibian","abiotic","insect","unknown"), zerofill = F) |>
   inner_join(wt_get_species() |> dplyr::select(species_code, species_class, species_order), by = "species_code") |>
-  dplyr::select(location, location_id, recording_date_time, species_code, species_common_name, individual_order, abundance) |>
+  dplyr::select(organization, location, location_id, recording_date_time, species_code, species_common_name, individual_order, abundance) |>
   distinct() |>
-  group_by(location, location_id, recording_date_time, species_code, species_common_name) |>
+  group_by(organization, location, location_id, recording_date_time, species_code, species_common_name) |>
   summarise(count = max(individual_order)) |>
   ungroup() |>
   pivot_wider(names_from = species_code, values_from = count, values_fill = 0) |>
-  pivot_longer(cols = -(location:species_common_name), names_to = "species", values_to = "count") |>
-  group_by(location, location_id, year = year(recording_date_time), species) |>
+  pivot_longer(cols = -(organization:species_common_name), names_to = "species", values_to = "count") |>
+  group_by(organization, location, location_id, year = year(recording_date_time), species) |>
   summarise(total_count = sum(count)) |>
   ungroup() |>
-  group_by(location, location_id, year) |>
+  group_by(organization, location, location_id, year) |>
   summarise(shannon_index = diversity(total_count, index = "shannon")) |>
   ungroup() |>
   left_join(covs |> select(location_id:veg_type), by = c("location_id","year"))
   
-
 shannon_d |>
   filter(!is.na(shannon_index), !is.na(veg_type)) |>
   ggplot(aes(x = factor(year), y = shannon_index, fill = factor(year))) +
@@ -288,11 +531,19 @@ shannon_d |>
        y = "Shannon diversity index per location") +
   theme_bw() +
   guides(fill = guide_legend(title = "Year")) +
-  scale_fill_viridis_d(alpha = 0.8, option = "cividis") +
-  facet_wrap(~ veg_type)
+  scale_fill_viridis_d(alpha = 0.8, option = "plasma") +
+  facet_wrap(~ organization)
 
 ```
+
 ```{r}
+#| include: true
+#| echo: false
+#| eval: true
+#| warning: false
+#| message: false
+#| label: fig-shannon-pre-post
+#| tbl-cap: Shannon Diversity Index by Sample Type (Pre- and Post-Burn) Across Surveyed Locations
 
 shannon_d |>
   filter(!is.na(shannon_index), !is.na(sample_type), !is.na(veg_type)) |>
@@ -300,19 +551,139 @@ shannon_d |>
   ggplot(aes(x = sample_type, y = shannon_index, fill = sample_type)) +
   geom_boxplot(outlier.shape = NA, alpha = 0.8) +
   geom_jitter(width = 0.2, alpha = 0.6, color = "grey40") +
-  facet_wrap(~ veg_type, scales = "free_y") +
-  scale_fill_viridis_d(option = "cividis", end = 0.8) +
+  facet_wrap(~ organization) +
+  scale_fill_viridis_d(option = "plasma", end = 0.8) +
   labs(
     x = "Burn Status",
     y = "Shannon Diversity Index",
     fill = "Sample Type",
     title = "Shannon Diversity Pre- and Post-Burn by Vegetation Type"
   ) +
-  theme_bw(base_size = 14) +
+  theme_bw() +
   theme(
     legend.position = "bottom"
   )
 
 ```
 
+
 # Discussion and Recommendations
+
+
+
+## Recommendations
+
+### Site naming conventions
+
+* **Standardize years of repeat surveys:** Use a consistent naming scheme for each site that persists across years (e.g., `Region_Code_SiteNumber_NorthGrid`). This ensures that data from year to year can be reliably linked and joined when loading into WildTrax or other analytical systems. Inconsistent naming leads to fragmented records and difficult merges.
+* **Include hierarchical identifiers:** Where possible, include a broader geographic identifier (e.g., project, region, sub-site) before the specific site name. Hierarchical metadata helps automated workflows group data logically without manual intervention.
+* **Record naming schema explicitly:** Maintain a short README or metadata dictionary for each dataset that defines the naming convention and abbreviations used. This helps onboard new field teams and keeps naming consistent as personnel change.
+
+### Location metadata
+
+While not entirely necessary for all analyses, consistently recording the following key metadata greatly improves downstream utility and interoperability:
+
+* **Coordinates:** Latitude/longitude (decimal degrees) of each survey point or plot.
+* **Date and time:** When the recording or measurement occurred.
+* **Recorder and method:** Who collected the data and what device/protocol was used.
+* **Environmental context:** Vegetation type, weather conditions, and any notable pre-burn conditions.
+
+These metadata elements make it easier to pair field data with remote sensing products and interpret burn severity in context.
+
+### Burn severity
+For a **field-usable burn severity assessment protocol**, one widely used approach is the **Composite Burn Index (CBI)**. This provides a repeatable, structured way to characterize how severe fire effects were on different vegetation and substrate layers.
+
+**Composite Burn Index (CBI) key elements:**
+
+* **Plot definition:** Evaluate burn effects within a defined plot (typically ~30 m diameter to match satellite pixels).
+* **Strata:** Score fire effects across five vertical strata — substrate (litter, duff, soil), herbaceous/low shrubs, tall shrubs/saplings, intermediate trees, and large trees.
+* **Scoring:** Within each stratum, field observers score multiple attributes (percent vegetation mortality, soil exposure, char height) on a 0–3 scale (0 = unburned, 3 = highest severity).
+* **Aggregation:** Average scores per strata and calculate a composite CBI score for the entire plot. This allows comparisons across sites and integration with remote sensing burn severity maps.
+* **Documentation:** Use consistent scoring sheets and photos at fixed viewpoints to support interpretation.
+
+**Practical Burn Severity Protocol Outline (Field Sheet Structure):**
+
+1. **Plot information**
+   - Plot ID (consistent with naming convention)
+   - GPS coordinates
+   - Date/Time
+   - Team members
+2. **Vegetation/Substrate strata assessment (0–3 scores)**
+   - Substrate: litter/duff consumption; exposed soil
+   - Herbaceous/low shrubs: percent dead vs. surviving
+   - Tall shrubs/saplings: mortality and char
+   - Intermediate trees: crown scorch and tree mortality
+   - Large trees: crown scorch, bole char height
+3. **Supporting observations**
+   - Maximum char height observed (meters)
+   - Description of unburned refugia or fire skips
+   - Representative photos (standardized orientation if possible)
+4. **Composite score calculation**
+   - Average scores within each stratum
+   - Average across strata for overall severity class
+
+**Burn Severity Class Examples (Simplified):**
+
+| Class | Field Criteria Example |
+|-------|------------------------|
+| **Unburned** | No litter consumption, vegetation layers intact |
+| **Low severity** | Litter mostly consumed, understorey affected, scorch low |
+| **Moderate severity** | Duff consumed, mid-layer mortality, some overstory scorch |
+| **High severity** | Bare soil exposed, upper canopy affected, high char heights |
+
+These simplified classes can be sufficient for operational use and link back to CBI gradations.
+
+### Recording collection
+
+For single-visit point counts, ensure at least 11 minutes of recording per session. For surveys using pre-programmed ARUs, we recommend a staggered recording schedule throughout the year, covering winter, spring, summer, and post-breeding seasons. The table below summarizes the recommended recording blocks, corresponding time-of-day indices, and recording durations. The recording schedule is organized into blocks, which represent staggered periods of data collection throughout the season in shorter 3 to 10 minute recording. By distributing recordings across both times of day and seasonal periods, this design provides a comprehensive and balanced dataset, allowing for a robust assessment of bird communities before, during, and after prescribed fires.
+
+```{r}
+#| include: false
+#| echo: false
+#| eval: true
+#| warning: false
+#| message: false
+
+abmib <- tibble(julian = 90:210) %>%
+  crossing(time_index = 1:4) %>%
+  mutate(
+    blocks = case_when(
+      julian %in% 90:139 & time_index == 1 ~ 9,
+      julian %in% 140:159 & time_index == 1 ~ 10,
+      julian %in% 160:179 & time_index == 1 ~ 11,
+      julian %in% 180:210 & time_index == 1 ~ 12,
+      julian %in% 90:104 & time_index == 3 ~ 1,
+      julian %in% 105:119 & time_index == 4 ~ 2,
+      julian %in% 120:139 & time_index == 3 ~ 3,
+      julian %in% 140:149 & time_index == 3 ~ 4,
+      julian %in% 150:159 & time_index == 4 ~ 5,
+      julian %in% 160:169 & time_index == 3 ~ 6,
+      julian %in% 170:179 & time_index == 4 ~ 7,
+      julian %in% 180:210 & time_index == 4 ~ 8,
+      TRUE ~ NA_real_
+    ),
+    recs = case_when(
+      blocks %in% 4:7 ~ 180,
+      TRUE ~ 60
+    )
+  )
+
+# Summarize schedule for table
+recs_table <- abmib %>%
+  filter(!is.na(blocks)) %>%
+  group_by(blocks) %>%
+  summarise(
+    Julian_Days = paste(range(julian), collapse = "-"),
+    Time_Index = paste(unique(time_index), collapse = ", "),
+    Recording_min = unique(recs),
+    .groups = "drop"
+  ) %>%
+  arrange(blocks)
+
+# Output nicely formatted table
+recs_table %>%
+  kable(format = "html", caption = "Recommended ARU Recording Schedule Across Seasons") %>%
+  kable_styling(full_width = FALSE, position = "left", bootstrap_options = c("striped", "hover"))
+
+```
+
