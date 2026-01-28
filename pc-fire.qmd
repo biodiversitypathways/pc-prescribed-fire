@@ -44,7 +44,7 @@ library(kableExtra)
 library(DT)
 
 load("pc-fire.RData")
-save.image("pc-fire.RData")
+#save.image("pc-fire.RData")
 
 wt_auth()
 ```
