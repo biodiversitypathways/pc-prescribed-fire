@@ -309,7 +309,7 @@ Some of these analyses are still a work-in-progress. Check back soon for updates
 ```{r}
 #| include: false
 #| echo: false
-#| eval: true
+#| eval: false
 #| warning: false
 #| message: false
 # Covariates
@@ -575,63 +575,25 @@ shannon_d |>
 
 ### Site naming conventions
 
-* **Standardize years of repeat surveys:** Use a consistent naming scheme for each site that persists across years (e.g., `Region_Code_SiteNumber_NorthGrid`). This ensures that data from year to year can be reliably linked and joined when loading into WildTrax or other analytical systems. Inconsistent naming leads to fragmented records and difficult merges.
-* **Include hierarchical identifiers:** Where possible, include a broader geographic identifier (e.g., project, region, sub-site) before the specific site name. Hierarchical metadata helps automated workflows group data logically without manual intervention.
-* **Record naming schema explicitly:** Maintain a short README or metadata dictionary for each dataset that defines the naming convention and abbreviations used. This helps onboard new field teams and keeps naming consistent as personnel change.
+Consistent site naming is critical for linking repeat surveys across years and for ensuring data load cleanly into systems such as WildTrax. Each site should use a stable naming scheme that persists over time, even when surveys are repeated annually or seasonally. A format such as `Region_Code_SiteNumber_NorthGrid` allows records from different years to be reliably joined and avoids the fragmented datasets that result from ad-hoc renaming.
+
+Where possible, site names should incorporate hierarchical identifiers that move from broad to specific (for example, project or region followed by sub-site and point). This structure supports automated grouping and summarization without requiring manual reconciliation. To support long-term consistency, the naming schema and any abbreviations used should be documented in a short README or metadata dictionary that accompanies each dataset. Explicit documentation is especially important as field crews and analysts change over time.
 
 ### Location metadata
 
-While not entirely necessary for all analyses, consistently recording the following key metadata greatly improves downstream utility and interoperability:
+Although not every analysis requires full metadata, consistently recording a core set of location attributes substantially increases downstream utility and interoperability. At a minimum, this includes the latitude and longitude (decimal degrees) of each survey point or plot, along with the date and time of data collection. Information on who collected the data and the recorder or protocol used provides essential context for quality control and interpretation.
 
-* **Coordinates:** Latitude/longitude (decimal degrees) of each survey point or plot.
-* **Date and time:** When the recording or measurement occurred.
-* **Recorder and method:** Who collected the data and what device/protocol was used.
-* **Environmental context:** Vegetation type, weather conditions, and any notable pre-burn conditions.
-
-These metadata elements make it easier to pair field data with remote sensing products and interpret burn severity in context.
+Environmental descriptors such as vegetation type, weather conditions, and notable pre-burn characteristics further improve interpretability. Together, these metadata make it much easier to integrate field observations with remote sensing products and to interpret burn severity and biological responses in a broader ecological context.
 
 ### Burn severity
-For a **field-usable burn severity assessment protocol**, one widely used approach is the **Composite Burn Index (CBI)**. This provides a repeatable, structured way to characterize how severe fire effects were on different vegetation and substrate layers.
 
-**Composite Burn Index (CBI) key elements:**
+For a field-usable and repeatable approach to assessing burn severity, the Composite Burn Index (CBI) provides a well-established framework. CBI is designed to characterize fire effects across vegetation and substrate layers in a way that is comparable among sites and directly compatible with satellite-derived burn severity products.
 
-* **Plot definition:** Evaluate burn effects within a defined plot (typically ~30 m diameter to match satellite pixels).
-* **Strata:** Score fire effects across five vertical strata — substrate (litter, duff, soil), herbaceous/low shrubs, tall shrubs/saplings, intermediate trees, and large trees.
-* **Scoring:** Within each stratum, field observers score multiple attributes (percent vegetation mortality, soil exposure, char height) on a 0–3 scale (0 = unburned, 3 = highest severity).
-* **Aggregation:** Average scores per strata and calculate a composite CBI score for the entire plot. This allows comparisons across sites and integration with remote sensing burn severity maps.
-* **Documentation:** Use consistent scoring sheets and photos at fixed viewpoints to support interpretation.
+Assessments are conducted within a defined plot, typically on the order of 30 m in diameter to align with common satellite pixel sizes. Observations are made across five vertical strata: substrate (litter, duff, soil), herbaceous and low shrub layers, tall shrubs and saplings, intermediate trees, and large trees. Within each stratum, multiple attributes—such as vegetation mortality, soil exposure, and char height—are scored on a standardized 0–3 scale, where 0 represents unburned conditions and 3 indicates the highest severity. Scores are averaged within strata and then combined to produce a composite severity value for the plot.
 
-**Practical Burn Severity Protocol Outline (Field Sheet Structure):**
+To ensure consistency and transparency, field assessments should be recorded on standardized scoring sheets and supported by photographs taken from fixed viewpoints. In practice, field sheets should capture plot identifiers that align with the site naming convention, GPS coordinates, date and time, and observer names, followed by structured scoring for each vegetation and substrate layer. Additional observations, such as maximum char height, the presence of unburned refugia, or evidence of fire skips, provide valuable context for interpretation.
 
-1. **Plot information**
-   - Plot ID (consistent with naming convention)
-   - GPS coordinates
-   - Date/Time
-   - Team members
-2. **Vegetation/Substrate strata assessment (0–3 scores)**
-   - Substrate: litter/duff consumption; exposed soil
-   - Herbaceous/low shrubs: percent dead vs. surviving
-   - Tall shrubs/saplings: mortality and char
-   - Intermediate trees: crown scorch and tree mortality
-   - Large trees: crown scorch, bole char height
-3. **Supporting observations**
-   - Maximum char height observed (meters)
-   - Description of unburned refugia or fire skips
-   - Representative photos (standardized orientation if possible)
-4. **Composite score calculation**
-   - Average scores within each stratum
-   - Average across strata for overall severity class
-
-**Burn Severity Class Examples (Simplified):**
-
-| Class | Field Criteria Example |
-|-------|------------------------|
-| **Unburned** | No litter consumption, vegetation layers intact |
-| **Low severity** | Litter mostly consumed, understorey affected, scorch low |
-| **Moderate severity** | Duff consumed, mid-layer mortality, some overstory scorch |
-| **High severity** | Bare soil exposed, upper canopy affected, high char heights |
-
-These simplified classes can be sufficient for operational use and link back to CBI gradations.
+For operational use, composite scores can be grouped into simplified burn severity classes (unburned, low, moderate, high). These classes retain the ecological meaning of the underlying CBI scores while providing a clear, interpretable summary that can be readily linked to management objectives and remote sensing products.
 
 ### Recording collection
 
