@@ -311,7 +311,7 @@ We calculated the Shannon diversity index for each surveyed location and year to
 Some of these analyses are still a work-in-progress. Check back soon for updates and additional details.
 :::
 
-Species richness overall did not change significantly following burns. Paired pre- and post-burn comparisons across locations showed no systematic increase or decrease in richness (Wilcoxon signed-rank test, *V* = 19.5, *p* = 0.44).
+A summary of locations and covariates collected can be found in @tbl-paired. Species richness overall did not change significantly following burns. Paired pre- and post-burn comparisons across locations showed no systematic increase or decrease in richness (Wilcoxon signed-rank test, *V* = 19.5, *p* = 0.44).
 
 ```{r}
 #| include: true
@@ -320,7 +320,7 @@ Species richness overall did not change significantly following burns. Paired pr
 #| warning: false
 #| message: false
 #| label: fig-paired
-#| tbl-cap: Paired comparison of species richness before and after fire. Lines connect values from the same location, points show individual observations, and mean values are highlighted.
+#| fig-cap: Paired comparison of species richness before and after fire. Lines connect values from the same location, points show individual observations, and mean values are highlighted.
 
 burns_fire <- burns |>
   left_join(pf_fire_locs |> select(location_id, veg_type, year_burned, freq_burned) |> distinct(), by = "location_id") |>
@@ -372,7 +372,7 @@ wilcox.test(paired_df$post_richness, paired_df$pre_richness, paired = TRUE)
 #| warning: false
 #| message: false
 #| label: fig-tsf
-#| tbl-cap: Species abundance in relation to years since fire, vegetation type, and fire frequency.
+#| tbl-cap: Species abundance in relation to years since fire.
 
 tsf <- burns_fire |>
   select(organization, location, year, ysf, year_burned, freq_burned, veg_type, species_code, individual_order, abundance) |>
@@ -388,18 +388,23 @@ tsf_summary <- tsf %>%
     total_abundance = max(individual_order),
     mean_abundance  = mean(individual_order),
     n_records       = n()
-  )
+  ) |>
+  ungroup() |>
+  mutate(ysf = as.numeric(ysf))
 
-ggplot(tsf_summary, aes(x = ysf, y = total_abundance, colour = organization)) +
-  geom_point() +
+ggplot(tsf_summary |> filter(!is.na(ysf)), 
+       aes(x = ysf, y = mean_abundance, colour = organization)) +
+  geom_point(size = 3) +          
+  geom_smooth() +
   labs(
     x = "Years Since Fire",
-    y = "Total Abundance",
-    title = "Species Abundance vs Time Since Fire"
+    y = "Mean Abundance per Year since Fire",
   ) +
   theme_bw() +
-  facet_wrap(~organization) +
-  scale_colour_viridis_d(option = "plasma")
+  scale_colour_viridis_d(option = "plasma") +
+  coord_cartesian(xlim = c(min(tsf_summary$ysf, na.rm = TRUE),
+                           max(tsf_summary$ysf, na.rm = TRUE))) +
+  facet_wrap(~organization, ncol = 1)
 
 
 ```
@@ -414,54 +419,55 @@ ggplot(tsf_summary, aes(x = ysf, y = total_abundance, colour = organization)) +
 #| tbl-cap: Species community matrix
 
 comm_long <- burns_fire %>%
-  inner_join(burns_fire_paired |> select(location_id, year, burn_status) |> distinct(), by = c("location_id" = "location_id", "year" = "year")) |>
-  filter(burn_status %in% c("pre-burn", "post-burn")) %>%
-  group_by(location_id, year, burn_status, veg_type, species_code) %>%
-  summarise(abundance = n(), .groups = "drop")
+  inner_join(
+    burns_fire_paired %>%
+      select(location_id, year, burn_status) %>%
+      distinct(),
+    by = c("location_id", "year")
+  ) %>%
+  filter(species_code != "NONE") %>%
+  group_by(organization, location, recording_date_time, burn_status, species_code) %>%
+  summarise(
+    abundance = max(as.numeric(individual_order), na.rm = TRUE),
+    .groups = "drop"
+  )
 
 comm_mat <- comm_long %>%
-  unite(site_id, location_id, year, sample_type, remove = FALSE) %>%
   pivot_wider(
-    names_from = species_code,
+    names_from  = species_code,
     values_from = abundance,
-    values_fill = 0)
+    values_fill = 0
+  )
 
 multi_type <- comm_mat  %>%
-  dplyr::select(site_id, location_id, year, sample_type, veg_type) %>%
+  dplyr::select(organization, location, recording_date_time, burn_status) %>%
   distinct() %>%
   drop_na()
 
-t3 <- rda(comm_mat[,-c(1:5)] ~ sample_type + veg_type, data = multi_type)
-t3scores <- scores(t3, display = "sites") %>%
-as.data.frame() %>%
-rownames_to_column("site") %>%
-bind_cols(., multi_type)
-t3vect <- scores(t3, display = "species") %>%
-as.data.frame()
+t3 <- rda(comm_mat[,-c(1:4)] ~ burn_status, data = multi_type)
+t3scores <- scores(t3, display = "sites") |>
+  as.data.frame() |>
+  rownames_to_column("site") |>
+  bind_cols(multi_type)
+t3vect <- scores(t3, display="species") |>
+  as.data.frame() |>
+  tibble::rownames_to_column("species_code")
 
-plot_RDA <- ggplot(data = t3scores, aes(x = RDA1, y = RDA2)) +
-  geom_point(data = t3scores, aes(x = RDA1, y = RDA2, colour = veg_type), 
-             alpha = 0.7, size = 3, shape = 16) +
-  stat_ellipse(data = t3scores, aes(colour = sample_type), 
-               linetype = 1, type = 'norm', level = 0.67, size = 1) +
-  geom_vline(xintercept = 0, color = "#A19E99", linetype = 2, size = 1) +
-  geom_hline(yintercept = 0, color = "#A19E99", linetype = 2, size = 1) +
-  geom_segment(data = t3vect, aes(x = 0, y = 0, xend = RDA1, yend = RDA2), 
-               arrow = arrow(length = unit(0.2, "cm")), size = 0.3) +
-  geom_text_repel(data = t3vect, aes(x = RDA1, y = RDA2, label = rownames(t3vect)), 
-                  size = 3, colour = "black", fontface = "italic", 
-                  max.overlaps = 10, 
-                  segment.color = "grey70") +
+
+plot_RDA <- ggplot(t3scores, aes(x = RDA1, y = PC1)) +
+  geom_point(aes(colour = burn_status), alpha = 0.7, size = 3) +
+  stat_ellipse(aes(colour = burn_status), type = "norm", level = 0.67, linewidth = 1) +
+  geom_vline(xintercept = 0, linetype = 2, colour = "#A19E99") +
+  geom_hline(yintercept = 0, linetype = 2, colour = "#A19E99") +
+  geom_segment(data = t3vect, aes(x = 0, y = 0, xend = RDA1, yend = PC1), arrow = arrow(length = unit(0.2, "cm")), linewidth = 0.3, inherit.aes = FALSE) +
+  geom_text_repel(data = t3vect, aes(x = RDA1, y = PC1, label = species_code), size = 3, fontface = "italic", colour = "black", max.overlaps = 10, inherit.aes = FALSE) +
   theme_bw() +
   scale_colour_viridis_d(option = "cividis", end = 0.9) +
-  labs(x = "RDA1", y = "RDA2", title = "Species-fire associations", 
-       colour = "Sample Type") +
-  theme(legend.position = "right", 
-        legend.title = element_text(size = 10), 
-        legend.text = element_text(size = 9), 
-        plot.title = element_text(hjust = 0.5, size = 14, face = "bold"))
+  labs(x = "RDA1", y = "PC1", title = "Species associations by burn status", colour = "Burn status") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold"), legend.position = "right")
 
 plot_RDA
+
 
 ```
 
