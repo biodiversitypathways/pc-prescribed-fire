@@ -569,47 +569,57 @@ Recordings are organized into blocks representing short (3–10 minute) sampling
 #| code-fold: true
 #| tbl-cap: Recommendation for pre-programmed long-term ARU scheduling. Complements the Alberta Biodiversity Monitoring Institute's Ecosystem Health and Biodiversity Trajectories programs.
 
-abmib <- tibble(julian = 90:210) %>%
-  crossing(time_index = 1:4) %>%
-  mutate(
-    blocks = case_when(
-      julian %in% 90:139 & time_index == 1 ~ 9,
-      julian %in% 140:159 & time_index == 1 ~ 10,
-      julian %in% 160:179 & time_index == 1 ~ 11,
-      julian %in% 180:210 & time_index == 1 ~ 12,
-      julian %in% 90:104 & time_index == 3 ~ 1,
-      julian %in% 105:119 & time_index == 4 ~ 2,
-      julian %in% 120:139 & time_index == 3 ~ 3,
-      julian %in% 140:149 & time_index == 3 ~ 4,
-      julian %in% 150:159 & time_index == 4 ~ 5,
-      julian %in% 160:169 & time_index == 3 ~ 6,
-      julian %in% 170:179 & time_index == 4 ~ 7,
-      julian %in% 180:210 & time_index == 4 ~ 8,
-      TRUE ~ NA_real_
-    ),
-    recs = case_when(
-      blocks %in% 4:7 ~ 180,
-      TRUE ~ 60
-    )
-  )
+library(tidyverse)
+library(knitr)
+library(kableExtra)
 
-# Summarize schedule for table
+# Define the daily recording times for each block (simplified)
+daily_times <- tibble(
+  blocks = 1:12,
+  Daily_Times = list(
+    c("00:00", "02:00"),        # Block 1
+    c("05:37", "07:07"),        # Block 2
+    c("12:00", "15:00"),        # Block 3
+    c("21:10", "23:10"),        # Block 4
+    c("00:00", "02:00"),        # Block 5 (example repeat, adjust as needed)
+    c("05:37", "07:07"),        # Block 6
+    c("12:00", "15:00"),        # Block 7
+    c("21:10", "23:10"),        # Block 8
+    c("00:00", "02:00"),        # Block 9
+    c("05:37", "07:07"),        # Block 10
+    c("12:00", "15:00"),        # Block 11
+    c("21:10", "23:10")         # Block 12
+  )
+)
+
+# Summarize seasonal schedule
 recs_table <- abmib %>%
   filter(!is.na(blocks)) %>%
   group_by(blocks) %>%
   summarise(
     Julian_Days = paste(range(julian), collapse = "-"),
-    Time_Index = paste(unique(time_index), collapse = ", "),
     Recording_min = unique(recs),
     .groups = "drop"
   ) %>%
-  arrange(blocks) |>
-  select(-Time_Index)
+  left_join(daily_times, by = "blocks") %>%
+  arrange(blocks)
+
+# Convert daily times to a single string per row for table
+recs_table <- recs_table %>%
+  mutate(Daily_Times = map_chr(Daily_Times, ~ paste(.x, collapse = ", ")))
 
 # Output nicely formatted table
 recs_table %>%
-  kable(format = "html", caption = "Recommended ARU Recording Schedule Across Seasons") %>%
-  kable_styling(full_width = FALSE, position = "left", bootstrap_options = c("striped", "hover"))
+  kable(
+    format = "html",
+    caption = "Recommended ARU Recording Schedule Across Seasons and Daily Times"
+  ) %>%
+  kable_styling(
+    full_width = FALSE,
+    position = "left",
+    bootstrap_options = c("striped", "hover")
+  )
+
 
 ```
 
