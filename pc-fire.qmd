@@ -58,7 +58,7 @@ wt_auth()
 #| message: false
 # Download data
 
-burn_projects <- c(2291, 282, 662, 672, 1092, 2021, 2878, 3577, 388, 1251, 1252, 1253, 1935, 2879, 2195, 2317, 2286, 2300, 2640, 2282, 3127, 4091, 3938, 3736, 3249, 2804)
+burn_projects <- c(2291, 282, 662, 672, 1092, 2021, 2878, 3577, 388, 1251, 1252, 1253, 1935, 2879, 2195, 2317, 2286, 2300, 2640, 2282, 3127, 4091, 3938, 3736, 3249, 2804, 4145)
 
 einps <- wt_get_projects('ARU') |> filter(grepl('Elk Island',project), !project_id %in% burn_projects) |> pull(project_id)
 
@@ -138,31 +138,7 @@ Data were collected using passive autonomous recording units (ARUs; @Shonfield20
 #| warning: false
 #| message: false
 
-burn_locs <- burns |>
-  select(location, location_id, latitude, longitude) |>
-  distinct() |>
-  filter(!is.na(latitude))
 
-burn_sf <- st_as_sf(burn_locs, coords = c("longitude","latitude"), crs = 4326)
-
-burn_locs |>
-  filter(!is.na(latitude)) |>
-  left_join(burns |> select(project_id, location_id) |> distinct(), by = "location_id") |>
-  left_join(wt_get_projects("ARU") |> select(project_id, organization_name) |> distinct(), by = "project_id") |>
-  select(organization_name, location) |>
-  distinct()
-
-year_levels <- c("2019","2020","2021","2022","2023","2024","2025")
-
-locs_summary <- burns |>
-  group_by(organization, location, year) |>
-  summarise(n = n_distinct(recording_date_time), .groups = "drop") |>
-  pivot_wider(
-    names_from  = year,
-    values_from = n,
-    values_fill = 0
-  ) |>
-  relocate(all_of(year_levels), .after = location)
 ```
 
 ```{r}
