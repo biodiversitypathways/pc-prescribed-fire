@@ -324,7 +324,7 @@ Species richness overall did not change significantly following burns. Paired pr
 
 burns_fire <- burns |>
   left_join(pf_fire_locs |> select(location_id, veg_type, year_burned, freq_burned) |> distinct(), by = "location_id") |>
-  mutate(ysf = year - year_burned) 
+  mutate(ysf = year - year_burned)
 
 burns_fire_paired <- burns_fire |>
   group_by(organization, location, location_id, year, ysf, year_burned, veg_type, freq_burned) |>
@@ -334,12 +334,12 @@ burns_fire_paired <- burns_fire |>
 
 # Plot
 burns_fire_paired %>%
-  ggplot(aes(x = burn_status, y = richness, group = location_id)) +
-  geom_line(alpha = 0.3) +
-  geom_point() +
+  ggplot(aes(x = burn_status, y = richness, group = burn_status, fill = organization)) +
+  geom_boxplot() +
   theme_bw() +
   facet_wrap(~organization) +
   ylab("Species richness") +
+  scale_fill_viridis_d(option = "plasma")
   xlab("Burn status")
 
 ```
@@ -364,8 +364,6 @@ paired_df <- burns_fire_paired %>%
 wilcox.test(paired_df$post_richness, paired_df$pre_richness, paired = TRUE)
 
 ```
-
-
 
 ```{r}
 #| include: true
