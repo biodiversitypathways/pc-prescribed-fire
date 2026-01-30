@@ -4,6 +4,14 @@ format:
   html:
     grid:
       margin-width: 300px
+  pdf:
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    colorlinks: true
+    geometry:
+      - margin=1in
+    papersize: letter
 navbar: right
 theme: cosmo
 date: "`r format(Sys.time(), '%d %B, %Y')`"
@@ -42,6 +50,7 @@ library(leaflet)
 library(vegan)
 library(kableExtra)
 library(DT)
+library(tinytex)
 
 load("pc-fire.RData")
 #save.image("pc-fire.RData")
@@ -138,7 +147,7 @@ Over the past years, Parks Canada staff have conducted bird surveys within presc
 
 ## Data collection
 
-Data were collected using passive autonomous recording units (ARUs; @Shonfield2017) at `r length(unique(burns$location))` (@fig-aru-monitoring-locations). Recordings were summarized by month and organization to characterize the temporal distribution of sampling effort across parks and years (@fig-recordings-locations. Sampling occurred primarily during the breeding season (April–July), with the majority of effort concentrated in June. Temporal coverage varied among organizations, with some parks sampled in single years and others sampled repeatedly across multiple years. Monthly sample sizes ranged from low replication in some early or late-season deployments to higher levels of effort in core sampling months, reflecting differences in deployment timing, park-level logistics, and program objectives.
+Data were collected using passive autonomous recording units (ARUs; @Shonfield2017) at `r length(unique(burns$location))` locations (@fig-aru-monitoring-locations).
 
 ```{r}
 #| include: false
@@ -187,7 +196,7 @@ locs_summary <- burns |>
 #| message: false
 #| include: true
 #| fig-align: center
-#| fig-cap: Locations from Jasper National Park ARU EI Monitoring Program.
+#| fig-cap: Locations surveyed for prescribed fire monitoring.
 #| label: fig-aru-monitoring-locations
 
 leaflet() %>%
@@ -213,6 +222,8 @@ leaflet() %>%
 
 ```
 
+Recordings were summarized by month and park to characterize the temporal distribution of sampling effort across each region and year (@fig-recordings-locations). Sampling occurred primarily during the breeding season (April–July), with the majority of effort concentrated in June. Temporal coverage varied among parks with sampling in single years and others sampled repeatedly across multiple years (@tbl-loc-summary). Monthly sample sizes ranged from low replication in some early or late-season deployments to higher levels of effort in core sampling months, reflecting differences in deployment timing, park-level logistics, and local program objectives.
+
 ```{r}
 #| echo: false
 #| eval: true
@@ -223,13 +234,13 @@ leaflet() %>%
 #| fig-cap: Locations from Jasper National Park ARU EI Monitoring Program.
 #| label: fig-recordings-locations
 
-burns %>%
-  distinct(organization, recording_id, recording_date_time) %>%
-  mutate(month = lubridate::floor_date(recording_date_time, "month")) %>%
-  count(organization, month) %>%
+burns |>
+  distinct(organization, recording_id, recording_date_time) |>
+  mutate(month = lubridate::floor_date(recording_date_time, "month")) |>
+  count(organization, month) |>
   ggplot(aes(month, organization, fill = n)) +
   geom_tile() +
-  scale_fill_viridis_c(name = "Recordings", option = "plasma") +
+  scale_fill_viridis_c(name = "Count of Recordings", option = "plasma") +
   labs(
     x = "Month",
     y = "Park",
@@ -239,7 +250,7 @@ burns %>%
     date_breaks = "1 year",
     date_labels = "%Y"
   ) +
-  theme_minimal()
+  theme_bw()
 
 ```
 
@@ -266,7 +277,7 @@ datatable(locs_summary,
 
 ## Data management and processing
 
-The principal goal for data processing was to describe the acoustic community of species heard at locations while choosing a large enough subset of recordings for analyses. Data processing was completed in WildTrax with tags made using count-removal (see @farnsworth2002removal, @time-removal) where tags are only made at the time of first detection of each individual heard on the recordings (MacPhail et al. 2026 *In Review*). We also verified that all tags that were created were checked by a second observer (n = `r verified_tags |> select(Proportion) |> slice(2) |> pull()`) to ensure accuracy of detections. If amphibians were detected, abundance was estimated at the time of first detection using the [North American Amphibian Monitoring Program](https://www.usgs.gov/centers/eesc/science/north-american-amphibian-monitoring-program) with abundance of species being estimated on the scale of "calling intensity index" (CI) of 1 - 3. Mammals such as Red Squirrel, were also noted on the recordings. After the data are processed in WildTrax, the [wildrtrax](https://abbiodiversity.github.io/wildrtrax/) package is use to download the data into a standard format prepared for analysis. The `wt_download_report()` function downloads the data directly to a R framework for easy manipulation (see [wildrtrax APIs](https://abbiodiversity.github.io/wildrtrax/articles/apis.html)).
+The principal goal for data processing was to describe the acoustic community of species heard at locations while choosing a large enough subset of recordings for analyses. Data processing was completed in WildTrax with tags made using count-removal (see @farnsworth2002removal, @time-removal) where tags are only made at the time of first detection of each individual heard on the recordings (MacPhail et al. 2026 *In Review*). Multiple recording lengths were used in analysis relative to each national park (@fig-recordings-type) We also verified that all tags that were created were checked by a second observer (n = `r verified_tags |> select(Proportion) |> slice(2) |> pull()`) to ensure accuracy of detections. If amphibians were detected, abundance was estimated at the time of first detection using the [North American Amphibian Monitoring Program](https://www.usgs.gov/centers/eesc/science/north-american-amphibian-monitoring-program) with abundance of species being estimated on the scale of "calling intensity index" (CI) of 1 - 3. Mammals such as Red Squirrel, were also noted on the recordings. After the data are processed in WildTrax, the [wildrtrax](https://abbiodiversity.github.io/wildrtrax/) package is use to download the data into a standard format prepared for analysis. The `wt_download_report()` function downloads the data directly to a R framework for easy manipulation (see [wildrtrax APIs](https://abbiodiversity.github.io/wildrtrax/articles/apis.html)).
 
 ```{r}
 #| include: false
@@ -274,14 +285,15 @@ The principal goal for data processing was to describe the acoustic community of
 #| eval: true
 #| warning: false
 #| message: false
+#| fig-align: center
+#| fig-cap: Recording duration and method type collected from each national park.
+#| label: fig-recordings-type
 
 ggplot(burns, aes(x = organization, y = task_duration, color = task_method)) +
   geom_jitter(width = 0.2, height = 0, size = 3, alpha = 0.8) +
   labs(y = "Task Duration", x = "Organization", color = "Method") +
   theme_minimal() +
   facet_wrap(~task_method, ncol = 1)
-
-
 
 ```
 
@@ -582,35 +594,24 @@ shannon_d |>
 
 ```
 
-# Discussion and Recommendations
+# Discussion and recommendations
 
 ## Recommendations
 
-### Site naming conventions
-
-Consistent site naming is critical for linking repeat surveys across years and for ensuring data load cleanly into systems such as WildTrax. Each site should use a stable naming scheme that persists over time, even when surveys are repeated annually or seasonally. A format such as `Region_Code_SiteNumber_NorthGrid` allows records from different years to be reliably joined and avoids the fragmented datasets that result from ad-hoc renaming.
-
-Where possible, site names should incorporate hierarchical identifiers that move from broad to specific (for example, project or region followed by sub-site and point). This structure supports automated grouping and summarization without requiring manual reconciliation. To support long-term consistency, the naming schema and any abbreviations used should be documented in a short README or metadata dictionary that accompanies each dataset. Explicit documentation is especially important as field crews and analysts change over time.
-
 ### Location metadata
 
-Although not every analysis requires full metadata, consistently recording a core set of location attributes substantially increases downstream utility and interoperability. At a minimum, this includes the latitude and longitude (decimal degrees) of each survey point or plot, along with the date and time of data collection. Information on who collected the data and the recorder or protocol used provides essential context for quality control and interpretation.
+Consistent site naming is essential for linking repeat surveys across years and for ensuring data load cleanly into the WildTrax. Location names should follow a stable, documented convention that persists across seasons and years (e.g. EINP-MOS-3, AC-C2). This avoids fragmentation caused by ad-hoc renaming and allows records from different sampling periods to be reliably joined. Where possible, location names should use a hierarchical structure, moving from broad to specific (e.g., project or region → sub-site → point → treatment). This supports automated grouping, summarization, and analysis without manual reconciliation. The one condition however is not to indicate the sites by burn type, year or state after burn. This metadata would be accordingly joined afterwards to the location name as this would provide inconsistency within the WildTrax system. Nevertheless, each location in WildTrax has the ability to record spatial coordinates and Merging locations is possible. 
 
-Environmental descriptors such as vegetation type, weather conditions, and notable pre-burn characteristics further improve interpretability. Together, these metadata make it much easier to integrate field observations with remote sensing products and to interpret burn severity and biological responses in a broader ecological context.
+![](assets/location-tab.png)
+### Recording frequency and duration
 
-### Burn severity
+Prescribed burns typically occur outside the migratory breeding bird season; therefore, within-season pre- and post-burn surveys are generally not required. However, if a burn occurs during the breeding season (approximately May 15–July 15 across most surveyed parks), additional surveys should be conducted during both the breeding period and the subsequent post-breeding period (July 15–August 31) to capture potential immediate and short-term responses.
 
-For a field-usable and repeatable approach to assessing burn severity, the Composite Burn Index (CBI) provides a well-established framework. CBI is designed to characterize fire effects across vegetation and substrate layers in a way that is comparable among sites and directly compatible with satellite-derived burn severity products.
+Both resident and migratory species may respond to changes in burn state. Migratory species, in particular, may temporarily avoid burned areas or pass through them, although empirical evidence remains limited. Long-term acoustic monitoring using stationary ARUs placed within or adjacent to burn areas provides an effective approach for assessing site use and changes in community composition over time.
 
-Assessments are conducted within a defined plot, typically on the order of 30 m in diameter to align with common satellite pixel sizes. Observations are made across five vertical strata: substrate (litter, duff, soil), herbaceous and low shrub layers, tall shrubs and saplings, intermediate trees, and large trees. Within each stratum, multiple attributes—such as vegetation mortality, soil exposure, and char height—are scored on a standardized 0–3 scale, where 0 represents unburned conditions and 3 indicates the highest severity. Scores are averaged within strata and then combined to produce a composite severity value for the plot.
+Recording effort should be consistent across the park system to support comparability among sites and years. For single-visit point counts, a minimum of 11 minutes of recording per session is recommended, which includes buffer time for the observer to initiate and complete a 10-minute acoustic survey. For surveys using pre-programmed ARUs, we recommend a staggered recording schedule distributed across seasons (winter, spring, summer, and post-breeding) and times of day (@tbl-blocks).
 
-To ensure consistency and transparency, field assessments should be recorded on standardized scoring sheets and supported by photographs taken from fixed viewpoints. In practice, field sheets should capture plot identifiers that align with the site naming convention, GPS coordinates, date and time, and observer names, followed by structured scoring for each vegetation and substrate layer. Additional observations, such as maximum char height, the presence of unburned refugia, or evidence of fire skips, provide valuable context for interpretation.
-
-For operational use, composite scores can be grouped into simplified burn severity classes (unburned, low, moderate, high). These classes retain the ecological meaning of the underlying CBI scores while providing a clear, interpretable summary that can be readily linked to management objectives and remote sensing products.
-
-### Recording collection
-
-For single-visit point counts, ensure at least 11 minutes of recording per session. For surveys using pre-programmed ARUs, we recommend a staggered recording schedule throughout the year, covering winter, spring, summer, and post-breeding seasons. The table below summarizes the recommended recording blocks, corresponding time-of-day indices, and recording durations. The recording schedule is organized into blocks, which represent staggered periods of data collection throughout the season in shorter 3 to 10 minute recording. By distributing recordings across both times of day and seasonal periods, this design provides a comprehensive and balanced dataset, allowing for a robust assessment of bird communities before, during, and after prescribed fires.
+Recordings are organized into blocks representing short (3–10 minute) sampling periods spread across the season and diurnal cycle. This staggered design balances logistical constraints with ecological coverage, providing a robust dataset for characterizing bird communities and evaluating responses before, during, and after prescribed fire events.
 
 ```{r}
 #| include: false
@@ -618,6 +619,10 @@ For single-visit point counts, ensure at least 11 minutes of recording per sessi
 #| eval: true
 #| warning: false
 #| message: false
+#| label: tbl-blocks
+#| collapse: true
+#| code-fold: true
+#| tbl-cap: Recommendation for pre-programmed long-term ARU scheduling. Complements the Alberta Biodiversity Monitoring Institute's Ecosystem Health and Biodiversity Trajectories programs.
 
 abmib <- tibble(julian = 90:210) %>%
   crossing(time_index = 1:4) %>%
@@ -661,3 +666,10 @@ recs_table %>%
   kable_styling(full_width = FALSE, position = "left", bootstrap_options = c("striped", "hover"))
 
 ```
+
+### Burn severity
+
+For a field-usable and repeatable approach to assessing burn severity, which is likely a strong indicator of bird community composition (@knaggs2020avian), the Composite Burn Index (CBI) provides a well-established framework. CBI is designed to characterize fire effects across vegetation and substrate layers in a way that is comparable among sites and directly compatible with remote-sensed burn severity products.
+
+Assessments are conducted within a defined plot, typically on the order of 10-30 m in diameter to align with common satellite pixel sizes. Observations are made across five vertical strata: (1) substrate (litter, duff, soil), (2) herbaceous and low shrub layers, (3) tall shrubs and saplings, (4) understory trees, and (5) dominant and co-dominant trees. Within each stratum, multiple attributes, such as vegetation mortality, soil exposure, and char height, are scored on a standardized 0–3 scale, where 0 represents unburned conditions and 3 indicates the highest severity. Scores are averaged within strata and then combined to produce a composite severity value for the plot. To ensure consistency and transparency, field assessments should be recorded on standardized scoring sheets and supported by photographs taken from fixed viewpoints. In practice, field sheets should capture plot identifiers that align with the site naming convention, GPS coordinates, date and time, and observer names, followed by structured scoring for each vegetation and substrate layer. Additional observations, such as maximum char height, the presence of unburned refugia, or evidence of fire skips, provide valuable context for interpretation. For operational use, composite scores can be grouped into simplified burn severity classes (unburned, low, moderate, high). These classes retain the ecological meaning of the underlying CBI scores while providing a clear, interpretable summary that can be readily linked to management objectives and remote sensing products.
+
