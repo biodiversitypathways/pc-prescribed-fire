@@ -57,7 +57,7 @@ wt_auth()
 #| message: false
 # Download data
 
-burn_projects <- c(2291, 282, 662, 672, 1092, 2021, 2878, 3577, 388, 1251, 1252, 1253, 1935, 2879, 2195, 2317, 2286, 2300, 2640, 2282, 3127, 4091, 3938, 3736, 3249)
+burn_projects <- c(2291, 282, 662, 672, 1092, 2021, 2878, 3577, 388, 1251, 1252, 1253, 1935, 2879, 2195, 2317, 2286, 2300, 2640, 2282, 3127, 4091, 3938, 3736, 3249, 2804)
 
 einps <- wt_get_projects('ARU') |> filter(grepl('Elk Island',project), !project_id %in% burn_projects) |> pull(project_id)
 
@@ -106,15 +106,33 @@ This report is dynamically generated, meaning its results may evolve with the ad
 
 # Abstract
 
-Ecologists use prescribed fire as a management tool to maintain and restore ecosystem structure, composition, and function, particularly in fire-adapted landscapes. In Canada’s national parks, prescribed fire is increasingly used to reduce fuel loads, promote habitat heterogeneity, and support biodiversity objectives. However, understanding how bird communities respond to prescribed fire remains essential for evaluating both ecological benefits and potential impacts. Over the past three years, Parks Canada has collected standardized bird survey data within prescribed fire areas across `r length(unique(burns$organization))` national parks, encompassing `r length(unique(burns$location))` sampling locations and approximately `r nrow(burns)` species observation records. This report presents brief summary analyses of these data to characterize migratory bird communities before and after prescribed fire in terms of species composition, functional communities and richness. In addition, the analysis evaluates differences between pre- and post-fire conditions and assesses the effectiveness of the sampling design, including its ability to detect change and its statistical power. The results are intended to help guide future bird monitoring efforts within Parks Canada for adaptive fire management practices. 
+Ecologists use prescribed fire as a management tool to maintain and restore ecosystem structure, composition, and function, particularly in fire-adapted landscapes. In Canada’s national parks, prescribed fire is increasingly used to reduce fuel loads, promote habitat heterogeneity, protect communities, and support biodiversity objectives. However, understanding how bird communities respond to prescribed fire remains essential for evaluating both ecological benefits and potential impacts. Over the past three years, Parks Canada has collected standardized bird survey data within prescribed fire areas across `r length(unique(burns$organization))` national parks, encompassing `r length(unique(burns$location))` sampling locations and approximately `r nrow(burns)` species observation records. This report presents summary analyses of these data to characterize migratory bird communities before and after prescribed fire in terms of species composition and richness, and functional diversity. In addition, the analysis evaluates differences between pre- and post-fire conditions and assesses the effectiveness of the sampling design, including its ability to detect change and its statistical power. The results are intended to help guide future bird monitoring efforts within Parks Canada for adaptive fire management practices.
 
 # Land Acknowledgement
 
+This work was conducted in national parks located on the traditional lands of Indigenous, First Nations and Métis Peoples who have stewarded these landscapes since time immemorial. We recognize and respect the enduring relationships Indigenous communities maintain with the land, water, and wildlife, and we acknowledge the value of Indigenous knowledge systems that continue to inform understanding, care, and management of these places today.
+
+**Kluane**: We respectfully acknowledge that the lands of Kluane National Park Reserve where this study took place are the traditional territories of the Southern Tutchone people represented in the Kluane region by the Champagne and Aishihik First Nations and the Kluane First Nation. Champagne and Aishihik First Nations, Kluane First Nation and Parks Canada are jointly responsible for the management of Kluane’s natural and cultural resources.
+
+**Lake Louise, Yoho, Kootenay**: We respectfully acknowledge that Lake Louise (Banff), Yoho and Kootenay National Parks are located within the traditional lands of the Ktunaxa and Secwépemc peoples. We recognize their stewardship of the lands and waters in the area since time immemorial. Parks Canada is committed to reconciliation and renewed relationships with Indigenous peoples, based on a recognition of rights, respect, cooperation and partnership.
+
+**Riding Mountain**: We respectfully acknowledge Riding Mountain National Park is located within Treaty 2 Territory and Parks Canada works with First Nations from Treaties 2, 4 and 1. We mention this to honor our relations and the contributions made to establish the park, the province, and Canada.
+
+**Elk Island**: We acknowledge that Elk Island National Park is located within Amiskwaciy (Beaver Hills), a landscape that has been cared for and used by Indigenous peoples for thousands of years. We recognize the deep cultural, spiritual, and ecological connections Indigenous communities maintain with this land and affirm the importance of respecting Indigenous rights, knowledge, and stewardship in the ongoing care of this place.
+
+**Prince Albert**: We respectfully acknowledge that Prince Albert National Park is located on Treaty 6 Territory, the traditional lands of the Cree, Dene, Dakota, Saulteaux, and Ojibwe peoples, and is within the homeland of the Métis.
+
+**La Mauricie**: We respectfully acknowledge that La Mauricie National Park is part of the traditional territory of the Atikamekw Nation. For thousands of years, the Saint-Maurice River watershed and surrounding lakes were travelled and cared for by Indigenous Peoples, including the Atikamekw, who continue to maintain a deep and enduring relationship with this land.
+
+**Pukaskwa**:
+
+**Grasslands**: We respectfully honour and acknowledge that Grasslands National Park is located on the traditional territory of the Niitsitapi, Nakoda, Cree, and Saulteaux nations, as well as the Métis Homeland. We recognize the deep historical and cultural connections these Indigenous peoples have to this land, which they have stewarded for generations, and we are committed to moving forward in the spirit of reconciliation, respect, and stewardship.
+
 # Introduction
 
-Ecologists use prescribed fire as a deliberate and carefully planned management practice to mimic natural disturbance regimes, reduce accumulated fuels, and promote ecological processes that sustain biodiversity. In many forested and grassland ecosystems, periodic fire plays a critical role in shaping vegetation structure, influencing habitat availability, and maintaining species assemblages. Prescribed fires are therefore widely used to support conservation objectives, particularly in protected areas where maintaining ecological integrity is a primary mandate. Within Parks Canada, prescribed fire is a key component of wildland fire management. The PCA Fire Management Program coordinates fire management planning and operations across lands within the Parks Canada network, including the design and implementation of prescribed fires. While prescribed fire is expected to provide long-term ecological benefits, short- and medium-term responses of wildlife, particularly migratory birds, can vary depending on fire timing, intensity, extent, and pre-fire habitat conditions. As a result, systematic monitoring is required to evaluate both potential impacts and benefits of fire management actions.
+Ecologists use prescribed fire as a deliberate and carefully planned management practice to mimic natural disturbance regimes, reduce accumulated fuels, and promote ecological processes that sustain biodiversity. In many forested and grassland ecosystems, periodic fire plays a critical role in shaping vegetation structure, influencing habitat availability, and maintaining species assemblages. Prescribed fires are therefore widely used to support conservation objectives, particularly in protected areas where maintaining ecological integrity is a primary mandate. Within Parks Canada, prescribed fire is a key component of wildland fire management. The Parks Canada Fire Management Program coordinates fire management planning and operations across lands within the Parks Canada network, including the design and implementation of prescribed fires. While prescribed fire is expected to provide long-term ecological benefits, short- and medium-term responses of wildlife, particularly migratory birds, can vary depending on fire timing, intensity, extent, and pre-fire habitat conditions. As a result, systematic monitoring is required to evaluate both potential impacts and benefits of fire management actions.
 
-Over the past three years, Parks Canada staff have conducted bird surveys within prescribed fire areas to assess how migratory bird communities respond to fire. This dataset provides an opportunity to examine changes in bird species composition, functional communities and richness before and after prescribed fire, as well as to evaluate variation across parks and fire events. The primary objective of this report is to describe and compare migratory bird communities before and after prescribed fire and to assess whether detectable differences are evident in species-level and community-level metrics. A secondary objective is to evaluate the sampling strategy used, including its capacity to characterize bird communities and its statistical power to detect or model changes associated with prescribed fire. The results of this work will support Parks Canada in interpreting the ecological outcomes of prescribed fire and in refining future monitoring and fire management practices.
+Over the past years, Parks Canada staff have conducted bird surveys within prescribed fire areas to assess how migratory bird communities respond to fire. This dataset provides an opportunity to examine changes in bird species composition, functional communities and richness before and after prescribed fire, as well as to evaluate variation across parks and fire events. The primary objective of this report is to describe and compare migratory bird communities before and after prescribed fire and to assess whether detectable differences are evident in species-level and community-level metrics. A secondary objective is to evaluate the sampling strategy used, including its capacity to characterize bird communities and its statistical power to detect or model changes associated with prescribed fire. The results of this work will support Parks Canada in interpreting the ecological outcomes of prescribed fire and in refining future monitoring and fire management practices.
 
 # Methods
 
@@ -288,7 +306,6 @@ verified_tags <- burns |>
 verified_tags
 
 ```
-
 
 ## Analysis
 
@@ -494,7 +511,6 @@ plot_RDA
 
 ```
 
-
 ```{r}
 #| include: true
 #| echo: false
@@ -566,10 +582,7 @@ shannon_d |>
 
 ```
 
-
 # Discussion and Recommendations
-
-
 
 ## Recommendations
 
@@ -648,4 +661,3 @@ recs_table %>%
   kable_styling(full_width = FALSE, position = "left", bootstrap_options = c("striped", "hover"))
 
 ```
-
