@@ -256,11 +256,11 @@ datatable(locs_summary,
 The principal goal for data processing was to describe the acoustic community of species heard at locations while choosing a large enough subset of recordings for analyses. Data processing was completed in WildTrax with tags made using count-removal (see @farnsworth2002removal, @time-removal) where tags are only made at the time of first detection of each individual heard on the recordings (MacPhail et al. 2026 *In Review*). Multiple recording lengths were used in analysis relative to each national park (@fig-recordings-type) We also verified that all tags that were created were checked by a second observer (n = `r verified_tags |> select(Proportion) |> slice(2) |> pull()`) to ensure accuracy of detections. If amphibians were detected, abundance was estimated at the time of first detection using the [North American Amphibian Monitoring Program](https://www.usgs.gov/centers/eesc/science/north-american-amphibian-monitoring-program) with abundance of species being estimated on the scale of "calling intensity index" (CI) of 1 - 3. Mammals such as Red Squirrel, were also noted on the recordings. After the data are processed in WildTrax, the [wildrtrax](https://abbiodiversity.github.io/wildrtrax/) package is use to download the data into a standard format prepared for analysis. The `wt_download_report()` function downloads the data directly to a R framework for easy manipulation (see [wildrtrax APIs](https://abbiodiversity.github.io/wildrtrax/articles/apis.html)).
 
 ```{r}
-#| include: true
 #| echo: false
 #| eval: true
 #| warning: false
 #| message: false
+#| include: true
 #| fig-align: center
 #| fig-cap: Recording duration and method type collected from each national park.
 #| label: fig-recordings-type
