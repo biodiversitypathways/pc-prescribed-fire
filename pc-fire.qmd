@@ -525,10 +525,10 @@ shannon_d |>
   facet_wrap(~ organization) +
   scale_fill_viridis_d(option = "plasma") +
   labs(
-    x = "Burn Status",
-    y = "Shannon Diversity Index",
-    fill = "Sample Type",
-    title = "Shannon Diversity Pre- and Post-Burn by Vegetation Type"
+    x = "Burn status",
+    y = "Shannon diversity index",
+    fill = "Burn status",
+    title = "Shannon diversity pre- and post-burn by park"
   ) +
   theme_bw() +
   theme(
