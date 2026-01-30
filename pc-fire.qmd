@@ -175,14 +175,14 @@ locs_summary <- burns |>
 #| fig-cap: Locations surveyed for prescribed fire monitoring.
 #| label: fig-aru-monitoring-locations
 
-leaflet() %>%
-  addTiles() %>%
+leaflet() |>
+  addTiles() |>
   addPolygons(
     data = parks,
     popup = ~adminAreaN,
     fillOpacity = 0.4,
     color = "green"
-  ) %>%
+  ) |>
   addCircleMarkers(
     data = burn_locs,
     lng = ~longitude,
@@ -191,9 +191,9 @@ leaflet() %>%
     fillOpacity = 1,
     color = "black",
     radius = 6
-  ) %>%
+  ) |>
   addMeasure(primaryLengthUnit = "meters",
-             primaryAreaUnit = "sqmeters") %>%
+             primaryAreaUnit = "sqmeters") |>
   addMiniMap(position = "bottomleft")
 
 ```
@@ -268,8 +268,9 @@ The principal goal for data processing was to describe the acoustic community of
 ggplot(burns, aes(x = organization, y = task_duration, color = task_method)) +
   geom_jitter(width = 0.2, height = 0, size = 3, alpha = 0.8) +
   labs(y = "Task Duration", x = "Organization", color = "Method") +
-  theme_minimal() +
-  facet_wrap(~task_method, ncol = 1)
+  theme_bw() +
+  facet_wrap(~task_method, ncol = 1) +
+  scale_colour_viridis_d(option = "plasma")
 
 ```
 
@@ -319,6 +320,25 @@ A summary of locations and covariates collected can be found in @tbl-paired. Spe
 #| eval: true
 #| warning: false
 #| message: false
+#| label: tbl-paired
+#| tbl-cap: List of locations including vegetation type, year burned an frequency burned (total count of historical burns).
+
+datatable(pf_fire_locs |> select(-location_id), 
+          options = list(
+            searching = TRUE,  
+            paging = TRUE,    
+            pageLength = 10   
+          ))
+
+
+```
+
+```{r}
+#| include: true
+#| echo: false
+#| eval: true
+#| warning: false
+#| message: false
 #| label: fig-paired
 #| fig-cap: Paired comparison of species richness before and after fire. Lines connect values from the same location, points show individual observations, and mean values are highlighted.
 
@@ -333,13 +353,13 @@ burns_fire_paired <- burns_fire |>
          burn_status = factor(burn_status, levels = c("pre", "post")))
 
 # Plot
-burns_fire_paired %>%
+burns_fire_paired |>
   ggplot(aes(x = burn_status, y = richness, group = burn_status, fill = organization)) +
   geom_boxplot() +
   theme_bw() +
   facet_wrap(~organization) +
   ylab("Species richness") +
-  scale_fill_viridis_d(option = "plasma")
+  scale_fill_viridis_d(option = "plasma") +
   xlab("Burn status")
 
 ```
@@ -350,14 +370,14 @@ burns_fire_paired %>%
 #| warning: false
 #| message: false
 
-paired_df <- burns_fire_paired %>%
-  filter(!is.na(burn_status)) %>%
-  group_by(location_id) %>%
+paired_df <- burns_fire_paired |>
+  filter(!is.na(burn_status)) |>
+  group_by(location_id) |>
   summarise(
     pre_richness  = mean(richness[burn_status == "pre"], na.rm = TRUE),
     post_richness = mean(richness[burn_status == "post"], na.rm = TRUE),
     .groups = "drop"
-  ) %>%
+  ) |>
   filter(!is.na(pre_richness) & !is.na(post_richness))  # keep only locations with both
 
 # Wilcoxon signed-rank test (paired)
@@ -372,7 +392,7 @@ wilcox.test(paired_df$post_richness, paired_df$pre_richness, paired = TRUE)
 #| warning: false
 #| message: false
 #| label: fig-tsf
-#| tbl-cap: Species abundance in relation to years since fire.
+#| fig-cap: Species abundance in relation to years since fire.
 
 tsf <- burns_fire |>
   select(organization, location, year, ysf, year_burned, freq_burned, veg_type, species_code, individual_order, abundance) |>
@@ -382,8 +402,8 @@ tsf_model <- glm_abundance <- glm(individual_order ~ ysf + veg_type + freq_burne
                      family = poisson,
                      data = tsf)
 
-tsf_summary <- tsf %>%
-  group_by(organization, ysf) %>%
+tsf_summary <- tsf |>
+  group_by(organization, ysf) |>
   summarise(
     total_abundance = max(individual_order),
     mean_abundance  = mean(individual_order),
@@ -412,36 +432,36 @@ ggplot(tsf_summary |> filter(!is.na(ysf)),
 ```{r}
 #| include: true
 #| echo: false
-#| eval: false
+#| eval: true
 #| warning: false
 #| message: false
 #| label: fig-community
-#| tbl-cap: Species community matrix
+#| fig-cap: Species community matrix by pre and post burn status
 
-comm_long <- burns_fire %>%
+comm_long <- burns_fire |>
   inner_join(
-    burns_fire_paired %>%
-      select(location_id, year, burn_status) %>%
+    burns_fire_paired |>
+      select(location_id, year, burn_status) |>
       distinct(),
     by = c("location_id", "year")
-  ) %>%
-  filter(species_code != "NONE") %>%
-  group_by(organization, location, recording_date_time, burn_status, species_code) %>%
+  ) |>
+  filter(species_code != "NONE") |>
+  group_by(organization, location, recording_date_time, burn_status, species_code) |>
   summarise(
     abundance = max(as.numeric(individual_order), na.rm = TRUE),
     .groups = "drop"
   )
 
-comm_mat <- comm_long %>%
+comm_mat <- comm_long |>
   pivot_wider(
     names_from  = species_code,
     values_from = abundance,
     values_fill = 0
   )
 
-multi_type <- comm_mat  %>%
-  dplyr::select(organization, location, recording_date_time, burn_status) %>%
-  distinct() %>%
+multi_type <- comm_mat  |>
+  dplyr::select(organization, location, recording_date_time, burn_status) |>
+  distinct() |>
   drop_na()
 
 t3 <- rda(comm_mat[,-c(1:4)] ~ burn_status, data = multi_type)
@@ -462,7 +482,7 @@ plot_RDA <- ggplot(t3scores, aes(x = RDA1, y = PC1)) +
   geom_segment(data = t3vect, aes(x = 0, y = 0, xend = RDA1, yend = PC1), arrow = arrow(length = unit(0.2, "cm")), linewidth = 0.3, inherit.aes = FALSE) +
   geom_text_repel(data = t3vect, aes(x = RDA1, y = PC1, label = species_code), size = 3, fontface = "italic", colour = "black", max.overlaps = 10, inherit.aes = FALSE) +
   theme_bw() +
-  scale_colour_viridis_d(option = "cividis", end = 0.9) +
+  scale_colour_viridis_d(option = "plasma", end = 0.9) +
   labs(x = "RDA1", y = "PC1", title = "Species associations by burn status", colour = "Burn status") +
   theme(plot.title = element_text(hjust = 0.5, face = "bold"), legend.position = "right")
 
@@ -478,7 +498,7 @@ plot_RDA
 #| warning: false
 #| message: false
 #| label: fig-shannon
-#| tbl-cap: Shannon Diversity Index by location and year for park surveys
+#| fig-cap: Shannon diversity index by location and year for park surveys
 
 shannon_d <- burns_fire |> 
   wt_tidy_species(remove = c("mammal","amphibian","abiotic","insect","unknown"), zerofill = F) |>
@@ -503,12 +523,13 @@ shannon_d |>
   ggplot(aes(x = factor(year), y = shannon_index, fill = factor(year))) +
   geom_boxplot() +
   geom_point(alpha = 0.6, colour = "grey") +
-  labs(x = "Year",
-       y = "Shannon diversity index per location") +
+  labs(x = "Year", y = "Shannon diversity index per location") +
   theme_bw() +
   guides(fill = guide_legend(title = "Year")) +
   scale_fill_viridis_d(alpha = 0.8, option = "plasma") +
+  scale_x_discrete(breaks = function(x) x[seq(1, length(x), by = 2)]) +  # show every 2nd year
   facet_wrap(~ organization)
+
 
 ```
 
@@ -519,14 +540,14 @@ shannon_d |>
 #| warning: false
 #| message: false
 #| label: fig-shannon-pre-post
-#| tbl-cap: Shannon Diversity Index by Sample Type (Pre- and Post-Burn) Across Surveyed Locations
+#| fig-cap: Shannon diversity index by burn status across surveyed locations
 
 shannon_d |>
   ggplot(aes(x = burn_status, y = shannon_index, fill = burn_status)) +
-  geom_boxplot(outlier.shape = NA, alpha = 0.8) +
-  geom_jitter(width = 0.2, alpha = 0.6, color = "grey40") +
+  geom_jitter(width = 0.2, alpha = 0.3, color = "grey40") +
+  geom_boxplot(outlier.shape = NA, alpha = 0.6) +
   facet_wrap(~ organization) +
-  scale_fill_viridis_d(option = "plasma", end = 0.8) +
+  scale_fill_viridis_d(option = "plasma") +
   labs(
     x = "Burn Status",
     y = "Shannon Diversity Index",
@@ -597,27 +618,27 @@ daily_times <- tibble(
 )
 
 # Summarize seasonal schedule
-recs_table <- abmib %>%
-  filter(!is.na(blocks)) %>%
-  group_by(blocks) %>%
+recs_table <- abmib |>
+  filter(!is.na(blocks)) |>
+  group_by(blocks) |>
   summarise(
     Julian_Days = paste(range(julian), collapse = "-"),
     Recording_min = unique(recs),
     .groups = "drop"
-  ) %>%
-  left_join(daily_times, by = "blocks") %>%
+  ) |>
+  left_join(daily_times, by = "blocks") |>
   arrange(blocks)
 
 # Convert daily times to a single string per row for table
-recs_table <- recs_table %>%
+recs_table <- recs_table |>
   mutate(Daily_Times = map_chr(Daily_Times, ~ paste(.x, collapse = ", ")))
 
 # Output nicely formatted table
-recs_table %>%
+recs_table |>
   kable(
     format = "html",
     caption = "Recommended ARU Recording Schedule Across Seasons and Daily Times"
-  ) %>%
+  ) |>
   kable_styling(
     full_width = FALSE,
     position = "left",
