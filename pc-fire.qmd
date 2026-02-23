@@ -1,8 +1,17 @@
 ---
 title: "Report and assessment of prescribed fire effects on bird communities in Canada’s National Parks"
 format:
-  docx:
-    prefer-html: true
+  html:
+    grid:
+      margin-width: 300px
+  pdf:
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    colorlinks: true
+    geometry:
+      - margin=1in
+    papersize: letter
 navbar: right
 theme: cosmo
 date: "`r format(Sys.time(), '%d %B, %Y')`"
