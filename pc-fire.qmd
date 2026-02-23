@@ -1,9 +1,8 @@
 ---
 title: "Report and assessment of prescribed fire effects on bird communities in Canada’s National Parks"
 format:
-  html:
-    grid:
-      margin-width: 300px
+  docx:
+    prefer-html: true
 navbar: right
 theme: cosmo
 date: "`r format(Sys.time(), '%d %B, %Y')`"
@@ -37,12 +36,9 @@ github: https://github.com/biodiversitypathways/pc-prescribed-fire
 library(wildrtrax)
 library(tidyverse)
 library(sf)
-library(ggrepel)
-library(leaflet)
 library(vegan)
-library(kableExtra)
-library(DT)
 library(tinytex)
+library(knitr)
 
 load("pc-fire.RData")
 #save.image("pc-fire.RData")
@@ -129,24 +125,14 @@ Over the past years, Parks Canada staff have conducted bird surveys within presc
 
 ## Data collection
 
-Data were collected using passive autonomous recording units (ARUs; @Shonfield2017) at `r length(unique(burns$location))` locations (@fig-aru-monitoring-locations).
+Data were collected using passive autonomous recording units (ARUs; @Shonfield2017) at `r length(unique(burns$location))` locations (@fig-aru-monitoring-locations) in 9 National Parks. 
 
 ```{r}
-#| include: false
 #| echo: false
 #| eval: false
 #| warning: false
 #| message: false
-
-
-```
-
-```{r}
-#| echo: false
-#| eval: true
-#| warning: false
-#| message: false
-#| include: true
+#| include: false
 #| fig-align: center
 #| fig-cap: Locations surveyed for prescribed fire monitoring.
 #| label: fig-aru-monitoring-locations
@@ -217,19 +203,12 @@ burns |>
 #| code-fold: true
 #| tbl-cap: Locations surveyed across years with count of recordings collected per location.
 
-datatable(locs_summary, 
-          options = list(
-            searching = TRUE,  
-            paging = TRUE,    
-            pageLength = 10   
-          )) |>
-  formatStyle(columns = colnames(locs_summary), 
-              backgroundColor = styleEqual(c("NA"), "lightgray"))  
+kable(locs_summary) 
 ```
 
 ## Data management and processing
 
-The principal goal for data processing was to describe the acoustic community of species heard at locations while choosing a large enough subset of recordings for analyses. Data processing was completed in WildTrax with tags made using count-removal (see @farnsworth2002removal, @time-removal) where tags are only made at the time of first detection of each individual heard on the recordings (MacPhail et al. 2026 *In Review*). Multiple recording lengths were used in analysis relative to each national park (@fig-recordings-type) We also verified that all tags that were created were checked by a second observer (n = `r verified_tags |> select(Proportion) |> slice(2) |> pull()`) to ensure accuracy of detections. If amphibians were detected, abundance was estimated at the time of first detection using the [North American Amphibian Monitoring Program](https://www.usgs.gov/centers/eesc/science/north-american-amphibian-monitoring-program) with abundance of species being estimated on the scale of "calling intensity index" (CI) of 1 - 3. Mammals such as Red Squirrel, were also noted on the recordings. After the data are processed in WildTrax, the [wildrtrax](https://abbiodiversity.github.io/wildrtrax/) package is use to download the data into a standard format prepared for analysis. The `wt_download_report()` function downloads the data directly to a R framework for easy manipulation (see [wildrtrax APIs](https://abbiodiversity.github.io/wildrtrax/articles/apis.html)).
+The principal goal for data processing was to describe the acoustic community of species heard at locations while choosing a large enough subset of recordings for analyses. Data processing was completed in WildTrax with tags made using count-removal (see @farnsworth2002removal, @time-removal) where tags are only made at the time of first detection of each individual heard on the recordings (MacPhail et al. 2026 *In Review*). Multiple recording lengths were used in analysis relative to each national park (@fig-recordings-type) We also verified that all tags that were created were checked by a second observer (n = `r verified_tags |> select(Proportion) |> slice(2) |> pull()`) to ensure accuracy of detections. If amphibians were detected, abundance was estimated at the time of first detection using the [North American Amphibian Monitoring Program](https://www.usgs.gov/centers/eesc/science/north-american-amphibian-monitoring-program) with abundance of species being estimated on the scale of "calling intensity index" (CI) of 1 - 3. Mammals such as Red Squirrel, were also noted on the recordings. After the data are processed in WildTrax, the [wildrtrax](https://abbiodiversity.github.io/wildrtrax/) package was used to download the data into a standard format prepared for analysis. The `wt_download_report()` function downloads the data directly to a R framework for easy manipulation (see [wildrtrax APIs](https://abbiodiversity.github.io/wildrtrax/articles/apis.html)).
 
 ```{r}
 #| echo: false
@@ -238,7 +217,7 @@ The principal goal for data processing was to describe the acoustic community of
 #| message: false
 #| include: true
 #| fig-align: center
-#| fig-cap: Recording duration and method type collected from each national park.
+#| fig-cap: Recording duration and method type collected from each national park. 1SPT refers to 1 species-individual per task and 1SPM refers to 1 species-individual per minute for the duration of the task.
 #| label: fig-recordings-type
 
 ggplot(burns, aes(x = organization, y = task_duration, color = task_method)) +
@@ -288,7 +267,15 @@ We calculated the Shannon diversity index for each surveyed location and year to
 Some of these analyses are still a work-in-progress. Check back soon for updates and additional details.
 :::
 
-A summary of locations and covariates collected can be found in @tbl-paired. Species richness overall did not change significantly following burns. Paired pre- and post-burn comparisons across locations showed no systematic increase or decrease in richness (Wilcoxon signed-rank test, *V* = 19.5, *p* = 0.44).
+A summary of sampling locations and associated environmental covariates is provided in @tbl-paired. Across all paired stations, species richness did not differ significantly between pre- and post-burn conditions. A Wilcoxon signed-rank test detected no systematic directional shift in richness following fire (*V* = 19.5, *p* = 0.44), indicating that gains and losses were balanced across sites. Richness remained comparatively stable when aggregated across stations and study years (@fig-paired), suggesting that prescribed or natural burns did not produce a consistent short-term change in total species counts at the landscape scale.
+
+When examining abundance trajectories within National Parks where both pre- and post-burn data were available, mean abundance trends were largely stable through time. The primary deviation from this pattern occurred in Riding Mountain National Park, where abundance increased notably between 3 and 12 years post-fire (@fig-tsf). This delayed response suggests a potential mid-successional effect, rather than an immediate post-disturbance pulse.
+
+Despite the stability in richness and overall abundance, community composition exhibited divergence between pre- and post-burn states (@fig-community). Ordination patterns indicated contraction of species assemblages under post-burn conditions, consistent with a shift toward a more homogenized or filtered community structure. In other words, while total richness was maintained, the identity and relative contributions of species changed.
+
+Patterns in Shannon’s diversity index mirrored the richness results. Elk Island National Park showed a non-significant decline in Shannon diversity following fire, whereas other parks displayed variable but non-directional trends across pre- and post-burn periods. When parks were evaluated independently, none exhibited a statistically significant decline in Shannon’s index attributable to burn state.
+
+Collectively, these results indicate that fire did not consistently reduce species richness or diversity across parks, but it did alter community composition. The dominant signal of burn effects appears compositional rather than numeric, with structural reassembly occurring without broad-scale losses in diversity.
 
 ```{r}
 #| include: true
@@ -299,12 +286,7 @@ A summary of locations and covariates collected can be found in @tbl-paired. Spe
 #| label: tbl-paired
 #| tbl-cap: List of locations including vegetation type, year burned an frequency burned (total count of historical burns).
 
-datatable(pf_fire_locs |> select(-location_id), 
-          options = list(
-            searching = TRUE,  
-            paging = TRUE,    
-            pageLength = 10   
-          ))
+kable(pf_fire_locs |> select(-location_id))
 
 
 ```
@@ -456,7 +438,7 @@ plot_RDA <- ggplot(t3scores, aes(x = RDA1, y = PC1)) +
   geom_vline(xintercept = 0, linetype = 2, colour = "#A19E99") +
   geom_hline(yintercept = 0, linetype = 2, colour = "#A19E99") +
   geom_segment(data = t3vect, aes(x = 0, y = 0, xend = RDA1, yend = PC1), arrow = arrow(length = unit(0.2, "cm")), linewidth = 0.3, inherit.aes = FALSE) +
-  geom_text_repel(data = t3vect, aes(x = RDA1, y = PC1, label = species_code), size = 3, fontface = "italic", colour = "black", max.overlaps = 10, inherit.aes = FALSE) +
+  # geom_text_repel(data = t3vect, aes(x = RDA1, y = PC1, label = species_code), size = 3, fontface = "italic", colour = "black", max.overlaps = 10, inherit.aes = FALSE) +
   theme_bw() +
   scale_colour_viridis_d(option = "plasma", end = 0.9) +
   labs(x = "RDA1", y = "PC1", title = "Species associations by burn status", colour = "Burn status") +
@@ -539,7 +521,7 @@ shannon_d |>
 
 # Discussion
 
-Lorem ipsum.
+
 
 # Recommendations
 
@@ -610,17 +592,7 @@ recs_table <- recs_table |>
   mutate(Daily_Times = map_chr(Daily_Times, ~ paste(.x, collapse = ", ")))
 
 # Output nicely formatted table
-recs_table |>
-  kable(
-    format = "html",
-    caption = "Recommended ARU Recording Schedule Across Seasons and Daily Times"
-  ) |>
-  kable_styling(
-    full_width = FALSE,
-    position = "left",
-    bootstrap_options = c("striped", "hover")
-  )
-
+kable(recs_table)
 
 ```
 
