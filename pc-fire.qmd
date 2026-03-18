@@ -18,8 +18,6 @@ date: "`r format(Sys.time(), '%d %B, %Y')`"
 author: 
   - name: "Alex MacPhail"
     affiliation: "Biodiversity Pathways Ltd."
-  - name: "Gregg Walker"
-    affiliation: "Parks Canada"
 editor: visual
 nocite: '@*'
 bibliography: references.bib
@@ -93,6 +91,12 @@ parks_fire <- st_join(burn_sf, parks, join = st_intersects) |>
 
 parks <- parks |> filter(adminAreaN %in% parks_fire)
 
+burn_locs <- burns |>
+  select(location, latitude, longitude) |>
+  distinct() |>
+  drop_na(latitude) |>
+  st_as_sf(coords = c("longitude","latitude"), crs = 4326)
+
 ```
 
 ::: {.callout-note collapse="true" style="background-color: #f4f4f4; padding: 20px;"}
@@ -109,7 +113,7 @@ This work was conducted in national parks located on the traditional lands of In
 
 **Kluane**: We respectfully acknowledge that the lands of Kluane National Park Reserve where this study took place are the traditional territories of the Southern Tutchone people represented in the Kluane region by the Champagne and Aishihik First Nations and the Kluane First Nation. Champagne and Aishihik First Nations, Kluane First Nation and Parks Canada are jointly responsible for the management of Kluane’s natural and cultural resources.
 
-**Bannf, Lake Louise, Yoho, Kootenay**: We respectfully acknowledge that Lake Louise, Banff, Yoho and Kootenay National Parks are located within the traditional lands of the Ktunaxa and Secwépemc peoples. We recognize their stewardship of the lands and waters in the area since time immemorial. Parks Canada is committed to reconciliation and renewed relationships with Indigenous peoples, based on a recognition of rights, respect, cooperation and partnership.
+**Bannf, Lake Louise, Yoho, Kootenay**: We respectfully acknowledge that Lake Louise, and Banff, Yoho and Kootenay National Parks, are located within the traditional lands of the Ktunaxa and Secwépemc peoples. We recognize their stewardship of the lands and waters in the area since time immemorial. Parks Canada is committed to reconciliation and renewed relationships with Indigenous peoples, based on a recognition of rights, respect, cooperation and partnership.
 
 **Riding Mountain**: We respectfully acknowledge Riding Mountain National Park is located within Treaty 2 Territory and Parks Canada works with First Nations from Treaties 2, 4 and 1. We mention this to honor our relations and the contributions made to establish the park, the province, and Canada.
 
@@ -119,7 +123,7 @@ This work was conducted in national parks located on the traditional lands of In
 
 **La Mauricie**: We respectfully acknowledge that La Mauricie National Park is part of the traditional territory of the Atikamekw Nation. For thousands of years, the Saint-Maurice River watershed and surrounding lakes were travelled and cared for by Indigenous Peoples, including the Atikamekw, who continue to maintain a deep and enduring relationship with this land.
 
-**Pukaskwa**:
+**Pukaskwa**: 
 
 **Grasslands**: We respectfully honour and acknowledge that Grasslands National Park is located on the traditional territory of the Niitsitapi, Nakoda, Cree, and Saulteaux nations, as well as the Métis Homeland. We recognize the deep historical and cultural connections these Indigenous peoples have to this land, which they have stewarded for generations, and we are committed to moving forward in the spirit of reconciliation, respect, and stewardship.
 
@@ -157,8 +161,6 @@ leaflet() |>
   ) |>
   addCircleMarkers(
     data = burn_locs,
-    lng = ~longitude,
-    lat = ~latitude,
     popup = ~paste("Location:", location),
     fillOpacity = 1,
     color = "black",
@@ -200,20 +202,6 @@ burns |>
   ) +
   theme_bw()
 
-```
-
-```{r}
-#| warning: false
-#| echo: true
-#| eval: true
-#| message: false
-#| include: true
-#| label: tbl-loc-summary
-#| collapse: true
-#| code-fold: true
-#| tbl-cap: Locations surveyed across years with count of recordings collected per location.
-
-kable(locs_summary) 
 ```
 
 ## Data management and processing
@@ -505,6 +493,7 @@ shannon_d |>
 #| echo: false
 #| eval: true
 #| warning: false
+#| fig-height: 6
 #| message: false
 #| label: fig-shannon-pre-post
 #| fig-cap: Shannon diversity index by burn status across surveyed locations
@@ -528,11 +517,7 @@ shannon_d |>
 
 ```
 
-# Discussion
-
-
-
-# Recommendations
+# Discussion and Recommendations
 
 ## Location metadata
 
@@ -584,30 +569,39 @@ daily_times <- tibble(
   )
 )
 
-# Summarize seasonal schedule
-recs_table <- abmib |>
-  filter(!is.na(blocks)) |>
-  group_by(blocks) |>
-  summarise(
-    Julian_Days = paste(range(julian), collapse = "-"),
-    Recording_min = unique(recs),
-    .groups = "drop"
-  ) |>
-  left_join(daily_times, by = "blocks") |>
-  arrange(blocks)
-
-# Convert daily times to a single string per row for table
-recs_table <- recs_table |>
-  mutate(Daily_Times = map_chr(Daily_Times, ~ paste(.x, collapse = ", ")))
-
-# Output nicely formatted table
-kable(recs_table)
+# # Summarize seasonal schedule
+# recs_table <- abmib |>
+#   filter(!is.na(blocks)) |>
+#   group_by(blocks) |>
+#   summarise(
+#     Julian_Days = paste(range(julian), collapse = "-"),
+#     Recording_min = unique(recs),
+#     .groups = "drop"
+#   ) |>
+#   left_join(daily_times, by = "blocks") |>
+#   arrange(blocks)
+# 
+# # Convert daily times to a single string per row for table
+# recs_table <- recs_table |>
+#   mutate(Daily_Times = map_chr(Daily_Times, ~ paste(.x, collapse = ", ")))
+# 
+# # Output nicely formatted table
+# kable(recs_table)
 
 ```
 
 ## Burn severity
 
-For a field-usable and repeatable approach to assessing burn severity, which is likely a strong indicator of bird community composition (@knaggs2020avian), the Composite Burn Index (CBI) provides a well-established framework. CBI is designed to characterize fire effects across vegetation and substrate layers in a way that is comparable among sites and directly compatible with remote-sensed burn severity products.
+For a field-usable and repeatable approach to assessing burn severity, which is likely a strong indicator of bird community composition (@knaggs2020avian), the Composite Burn Index (CBI) provides a well-established framework. CBI is designed to characterize fire effects across vegetation and substrate layers in a way that is comparable among sites and directly compatible with remote-sensed burn severity products. Assessments are conducted within a defined plot, typically on the order of 10-30 m in diameter to align with common satellite pixel sizes. Observations are made across five vertical strata: (1) substrate (litter, duff, soil), (2) herbaceous and low shrub layers, (3) tall shrubs and saplings, (4) understory trees, and (5) dominant and co-dominant trees. Within each stratum, multiple attributes, such as vegetation mortality, soil exposure, and char height, are scored on a standardized 0–3 scale, where 0 represents unburned conditions and 3 indicates the highest severity. Scores are averaged within strata and then combined to produce a composite severity value for the plot. To ensure consistency and transparency, field assessments should be recorded on standardized scoring sheets and supported by photographs taken from fixed viewpoints. In practice, field sheets should capture plot identifiers that align with the site naming convention, GPS coordinates, date and time, and observer names, followed by structured scoring for each vegetation and substrate layer. Additional observations, such as maximum char height, the presence of unburned refugia, or evidence of fire skips, provide valuable context for interpretation. For operational use, composite scores can be grouped into simplified burn severity classes (unburned, low, moderate, high). These classes retain the ecological meaning of the underlying CBI scores while providing a clear, interpretable summary that can be readily linked to management objectives and remote sensing products.
 
-Assessments are conducted within a defined plot, typically on the order of 10-30 m in diameter to align with common satellite pixel sizes. Observations are made across five vertical strata: (1) substrate (litter, duff, soil), (2) herbaceous and low shrub layers, (3) tall shrubs and saplings, (4) understory trees, and (5) dominant and co-dominant trees. Within each stratum, multiple attributes, such as vegetation mortality, soil exposure, and char height, are scored on a standardized 0–3 scale, where 0 represents unburned conditions and 3 indicates the highest severity. Scores are averaged within strata and then combined to produce a composite severity value for the plot. To ensure consistency and transparency, field assessments should be recorded on standardized scoring sheets and supported by photographs taken from fixed viewpoints. In practice, field sheets should capture plot identifiers that align with the site naming convention, GPS coordinates, date and time, and observer names, followed by structured scoring for each vegetation and substrate layer. Additional observations, such as maximum char height, the presence of unburned refugia, or evidence of fire skips, provide valuable context for interpretation. For operational use, composite scores can be grouped into simplified burn severity classes (unburned, low, moderate, high). These classes retain the ecological meaning of the underlying CBI scores while providing a clear, interpretable summary that can be readily linked to management objectives and remote sensing products.
+## Site photos
+
+Standardized site photos provide a rapid, repeatable method for documenting burn severity and habitat characteristics when a full Composite Burn Index (CBI) protocol is not practical in the field. When collected consistently, photo documentation supports post-hoc severity assessment, habitat classification, long-term monitoring, and quality control. Each plot requires a complete set of eight standardized photos taken from the plot centre:
+
+* North, East, South, West (cardinal directions): taken at a consistent height (approximately 1–1.5 m above ground), aimed horizontally outward from plot centre. These capture mid- and understory vegetation conditions, char height on boles, surface fuel consumption, and general landscape context in each direction
+* Canopy (straight up): Camera aimed vertically upward from plot centre to document canopy cover, crown scorch, crown consumption, and canopy openness. This photo is particularly useful for estimating crown fire severity and canopy closure change over time
+* Nadir (straight down): Camera aimed vertically downward to capture ground surface conditions directly underfoot, including ash depth, soil char, litter and duff consumption, and any residual vegetation at the ground layer
+* Setup photo: a photo of the plot marker, ARU unit, datasheet, or GPS unit showing the plot ID and relevant metadata. This confirms plot identity and provides a visual record linking the photo set to the correct location and date
+
+
 
