@@ -123,7 +123,7 @@ This work was conducted in national parks located on the traditional lands of In
 
 **La Mauricie**: We respectfully acknowledge that La Mauricie National Park is part of the traditional territory of the Atikamekw Nation. For thousands of years, the Saint-Maurice River watershed and surrounding lakes were travelled and cared for by Indigenous Peoples, including the Atikamekw, who continue to maintain a deep and enduring relationship with this land.
 
-**Pukaskwa**: 
+**Pukaskwa**:
 
 **Grasslands**: We respectfully honour and acknowledge that Grasslands National Park is located on the traditional territory of the Niitsitapi, Nakoda, Cree, and Saulteaux nations, as well as the Métis Homeland. We recognize the deep historical and cultural connections these Indigenous peoples have to this land, which they have stewarded for generations, and we are committed to moving forward in the spirit of reconciliation, respect, and stewardship.
 
@@ -139,7 +139,7 @@ Over the past years, Parks Canada staff have conducted bird surveys within presc
 
 ## Data collection
 
-Data were collected using passive autonomous recording units (ARUs; @Shonfield2017) at `r length(unique(burns$location))` locations (@fig-aru-monitoring-locations) in 9 National Parks. 
+Data were collected using passive autonomous recording units (ARUs; @Shonfield2017) at `r length(unique(burns$location))` locations (@fig-aru-monitoring-locations) in 9 National Parks.
 
 ```{r}
 #| echo: false
@@ -318,6 +318,7 @@ burns_fire_paired |>
   xlab("Burn status")
 
 ```
+
 ```{r}
 #| include: true
 #| echo: false
@@ -598,10 +599,7 @@ For a field-usable and repeatable approach to assessing burn severity, which is 
 
 Standardized site photos provide a rapid, repeatable method for documenting burn severity and habitat characteristics when a full Composite Burn Index (CBI) protocol is not practical in the field. When collected consistently, photo documentation supports post-hoc severity assessment, habitat classification, long-term monitoring, and quality control. Each plot requires a complete set of eight standardized photos taken from the plot centre:
 
-* North, East, South, West (cardinal directions): taken at a consistent height (approximately 1–1.5 m above ground), aimed horizontally outward from plot centre. These capture mid- and understory vegetation conditions, char height on boles, surface fuel consumption, and general landscape context in each direction
-* Canopy (straight up): Camera aimed vertically upward from plot centre to document canopy cover, crown scorch, crown consumption, and canopy openness. This photo is particularly useful for estimating crown fire severity and canopy closure change over time
-* Nadir (straight down): Camera aimed vertically downward to capture ground surface conditions directly underfoot, including ash depth, soil char, litter and duff consumption, and any residual vegetation at the ground layer
-* Setup photo: a photo of the plot marker, ARU unit, datasheet, or GPS unit showing the plot ID and relevant metadata. This confirms plot identity and provides a visual record linking the photo set to the correct location and date
-
-
-
+-   North, East, South, West (cardinal directions): taken at a consistent height (approximately 1–1.5 m above ground), aimed horizontally outward from plot centre. These capture mid- and understory vegetation conditions, char height on boles, surface fuel consumption, and general landscape context in each direction
+-   Canopy (straight up): Camera aimed vertically upward from plot centre to document canopy cover, crown scorch, crown consumption, and canopy openness. This photo is particularly useful for estimating crown fire severity and canopy closure change over time
+-   Nadir (straight down): Camera aimed vertically downward to capture ground surface conditions directly underfoot, including ash depth, soil char, litter and duff consumption, and any residual vegetation at the ground layer
+-   Setup photo: a photo of the plot marker, ARU unit, datasheet, or GPS unit showing the plot ID and relevant metadata. This confirms plot identity and provides a visual record linking the photo set to the correct location and date
